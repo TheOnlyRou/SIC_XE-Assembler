@@ -261,7 +261,11 @@ public class Editor extends javax.swing.JFrame {
         
         if(f!=null)
         {
-            
+            try {
+                ass.Assemble();
+            } catch (IOException ex) {
+                Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
@@ -269,7 +273,7 @@ public class Editor extends javax.swing.JFrame {
         JFileChooser fileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files(.txt)","txt");
         fileChooser.setFileFilter(filter);            
-        int retval = fileChooser.showSaveDialog(jMenuItem4);
+        int retval = fileChooser.showSaveDialog(jMenuItem3);
         if (retval == JFileChooser.APPROVE_OPTION) 
         {
             File file = fileChooser.getSelectedFile();

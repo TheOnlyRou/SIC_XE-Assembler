@@ -1,6 +1,10 @@
 package sic_xe_assembler;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 
 public class SIC_XE_Assembler {
@@ -35,5 +39,18 @@ public class SIC_XE_Assembler {
         int decimal = Integer.parseInt(PC, 16);
         decimal +=bytes;
         PC = Integer.toHexString(decimal);
+    }
+    
+    public void Assemble() throws FileNotFoundException, IOException
+    {
+        int count = 0;
+        BufferedReader br = new BufferedReader(new FileReader(f)); 
+        String st; 
+        System.out.println(f.getAbsolutePath());
+        while ((st = br.readLine()) != null) 
+        {
+            String line = st.toUpperCase();
+            
+        }
     }
 }
