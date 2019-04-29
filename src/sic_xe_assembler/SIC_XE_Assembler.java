@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 
@@ -12,7 +13,7 @@ public class SIC_XE_Assembler {
 
     File f;
     Editor editor = new Editor(this);
-    Instruction[] inst = new Instruction[100];
+    ArrayList<Instruction> instructions = new ArrayList<Instruction>();
     private String PC;
     private int[] memory = new int[1024];
     public final int BYTE = 8;
@@ -23,7 +24,6 @@ public class SIC_XE_Assembler {
     Register T = new Register(24);
     Register F = new Register(48);
     
-    int count= 0;
     public boolean START = false;
     public boolean END = false;
     public boolean ORG = false;
@@ -60,35 +60,29 @@ public class SIC_XE_Assembler {
     private void stringToInstruction(String text)
     {
         String[] result = text.split("\\s");
-        System.out.print(Arrays.toString(result));
+        for(int i =0; i<result.length;i++)
+        {
+            System.out.println(i + "\t" + result[i]);
+        }
         if(result[0].startsWith("."))
         {
-            inst[count++].comment = Arrays.toString(result);
+            instructions.add(new Instruction(text));
         }
         else
         {
             switch(result.length)
             {
                 case 2:
-                    inst[count].opcode = result[0];
-                    inst[count++].operand1 = result[1];
+                    instructions.add(new Instruction(result[0],result[1]));
                     break;
                 case 3:
-                    inst[count].label = result[0];
-                    inst[count].opcode = result[1];
-                    inst[count++].operand1 = result[2];
+                    instructions.add(new Instruction(result[0],result[1],result[2],true));
                     break;
                 case 4:
-                    inst[count].opcode = result[0];
-                    inst[count].operand1 = result[1];
-                    // comma takes result[2]
-                    inst[count++].operand2 = result[3];
+                    instructions.add(new Instruction(result[0],result[1],result[3],false));
                     break;
                 case 5:
-                    inst[count].label = result[0];
-                    inst[count].opcode = result[1];
-                    inst[count].operand1 = result[2];
-                    inst[count++].operand2 = result[4];
+                    instructions.add(new Instruction(result[0],result[1],result[2],result[4]));
                     break;
             }
         }
@@ -96,19 +90,19 @@ public class SIC_XE_Assembler {
     
     private void testInstructions()
     {
-        for(int i=0; i<count; i++)
+        for(int i=0; i<instructions.size(); i++)
         {
             String test = "";
-            if(inst[i].comment!=null)
-                test = inst[i].comment;
-            if(inst[i].label!=null)
-                test = test + "\t" + inst[i].label;
-            if(inst[i].opcode!=null)
-                test = test + "\t" + inst[i].opcode;
-            if(inst[i].operand1!=null)
-                test = test + "\t" + inst[i].operand1;
-            if(inst[i].operand2!=null)
-                test = test + "\t" + inst[i].operand2;            
+            if(instructions.get(i).comment!=null)
+                test = instructions.get(i).comment;
+            if(instructions.get(i)!=null)
+                test = test + "\t" + instructions.get(i).label;
+            if(instructions.get(i)!=null)
+                test = test + "\t" + instructions.get(i).opcode;
+            if(instructions.get(i)!=null)
+                test = test + "\t" + instructions.get(i).operand1;
+            if(instructions.get(i)!=null)
+                test = test + "\t" + instructions.get(i).operand2;            
             System.out.println(test);
         }
     }
