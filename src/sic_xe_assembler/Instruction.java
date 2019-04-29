@@ -8,10 +8,14 @@ public class Instruction {
     String address = "";
     String label = "";
     String comment = "";
+    String Error = "";
     
-    public Instruction(String comment)
+    public Instruction(String comment,boolean type)
     {
-        this.comment = comment;
+        if(type)
+            this.comment = comment;
+        else
+            this.opcode = comment;
     }
  
     public Instruction(String opcode, String op1)
