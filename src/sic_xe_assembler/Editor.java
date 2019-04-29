@@ -249,29 +249,10 @@ public class Editor extends javax.swing.JFrame {
         }
         else
         {
-            JFileChooser fileChooser = new JFileChooser();
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files(.txt)","txt");
-            fileChooser.setFileFilter(filter);            
-            int retval = fileChooser.showSaveDialog(jMenuItem4);
-            if (retval == JFileChooser.APPROVE_OPTION) 
-            {
-                File file = fileChooser.getSelectedFile();
-                if (file == null) {
-                    return;
-                }
-                if (!file.getName().toLowerCase().endsWith(".txt")) {
-                    file = new File(file.getParentFile(), file.getName() + ".txt");
-                }
-                try {
-                    f = file;
-                    ass.f=file;
-                    System.out.println(ass.f.getAbsolutePath());
-                } catch (Exception e) {
-                }   
-            }
+            saveFile();
         }
         
-        if(f!=null)
+        if(f.canRead())
         {
             try {
                 ass.Assemble();
@@ -279,9 +260,22 @@ public class Editor extends javax.swing.JFrame {
                 Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        else
+        {
+            jDialog1.setVisible(true);
+            jButton1.setVisible(false);
+            jButton2.setVisible(true);
+            jDialog1.setTitle("File not specified"); 
+            jDialog1.setLocationRelativeTo(null);
+            jLabel2.setText("File was not specified. Please try again");
+        }
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        saveFile();
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void saveFile(){
         JFileChooser fileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files(.txt)","txt");
         fileChooser.setFileFilter(filter);            
@@ -323,8 +317,7 @@ public class Editor extends javax.swing.JFrame {
             } catch (Exception e) {
             }   
         }
-    }//GEN-LAST:event_jMenuItem3ActionPerformed
-
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
