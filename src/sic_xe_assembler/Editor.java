@@ -8,6 +8,7 @@ package sic_xe_assembler;
 import java.awt.Desktop;
 import java.awt.Insets;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -178,15 +179,24 @@ public class Editor extends javax.swing.JFrame {
         chooser.setFileFilter(filter);
         chooser.showOpenDialog(null);
         f = chooser.getSelectedFile();
-        if(f != null)
+        if(f.canRead())
         {
             ass.f = f;
+            System.out.println(ass.f.getAbsolutePath());
+            try {
+                displayFile();
+            } catch (IOException ex) {
+                Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        System.out.println(ass.f.getAbsolutePath());
-        try {
-            displayFile();
-        } catch (IOException ex) {
-            Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+        else
+        {
+            jDialog1.setVisible(true);
+            jButton1.setVisible(false);
+            jButton2.setVisible(true);
+            jDialog1.setTitle("File does not exist"); 
+            jDialog1.setLocationRelativeTo(null);
+            jLabel2.setText("File specified does not exist. Please try again");
         }
     }//GEN-LAST:event_jMenuItem2ActionPerformed
     
@@ -208,6 +218,8 @@ public class Editor extends javax.swing.JFrame {
         }
         else
         {
+            jButton1.setVisible(true);
+            jButton2.setVisible(true);
             jDialog1.setTitle("New File");
             jDialog1.setVisible(true);   
             jDialog1.setLocationRelativeTo(null);
@@ -277,11 +289,33 @@ public class Editor extends javax.swing.JFrame {
         if (retval == JFileChooser.APPROVE_OPTION) 
         {
             File file = fileChooser.getSelectedFile();
-            if (file == null) {
-                return;
+            if (!file.canRead()) {
+                System.out.println(file.getAbsolutePath());
+                if (!file.getName().toLowerCase().endsWith(".txt")) 
+                {
+                    try {
+                        String filename = file.getAbsolutePath() + ".txt";
+                        System.out.println(filename);
+                        file = new File (filename);
+                        FileWriter write = new FileWriter(filename, true);
+                        BufferedWriter outFile = null;
+                        outFile = new BufferedWriter(new FileWriter(filename));
+                        jTextArea1.write(outFile);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }            
             }
-            if (!file.getName().toLowerCase().endsWith(".txt")) {
-                file = new File(file.getParentFile(), file.getName() + ".txt");
+            else
+            {
+                String filename = file.getAbsolutePath();
+                BufferedWriter outFile = null;
+                try {
+                    outFile = new BufferedWriter(new FileWriter(filename, false));           
+                    jTextArea1.write(outFile);
+                } catch (IOException ex) {
+                    Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             try {
                 f = file;
