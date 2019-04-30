@@ -203,8 +203,7 @@ public class SIC_XE_Assembler {
                     instructions.get(j).address = instructions.get(i).operand1;
                 }
                 PC = instructions.get(i).operand1;
-            }
-            
+            }   
         }
     }
 }

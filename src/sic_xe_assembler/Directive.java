@@ -1,5 +1,11 @@
 package sic_xe_assembler;
 
-public class Directives {
-    public enum Op_format2 {START, END, BYTE, WORD, RESW, RESB, EQU, ORG};
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+public class Directive {
+            
+    public String[] dir = {"BYTE", "WORD", "RESW", "RESB", "EQU", "ORG"};
+    Set<String> directives = new HashSet<>(Arrays.asList(dir));
 }
