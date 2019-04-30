@@ -15,6 +15,7 @@ public class SIC_XE_Assembler {
 
     File f;
     Editor editor = new Editor(this);
+    Directive dir = new Directive();
     ArrayList<Instruction> instructions = new ArrayList<Instruction>();
     private String PC;
     private int[] memory = new int[1024];
@@ -63,6 +64,7 @@ public class SIC_XE_Assembler {
     
     public void Assemble() throws FileNotFoundException, IOException
     {
+        START = false;
         BufferedReader br = new BufferedReader(new FileReader(f)); 
         String st; 
         System.out.println(f.getAbsolutePath());
@@ -74,6 +76,7 @@ public class SIC_XE_Assembler {
         }
         testInstructions();
         detectErrors();
+        analyseInstructions();
     }
     
     private void stringToInstruction(String text)
@@ -145,7 +148,63 @@ public class SIC_XE_Assembler {
                 }
                 instructions.get(i).address = instructions.get(i).operand1;
             }
-            else if()
+            else if(instructions.get(i).comment.isEmpty() && !START)
+            {
+                instructions.get(i).Error = "ERROR: MISSING START STATEMENT";
+            }
+            else if(!instructions.get(i).opcode.isEmpty() && !instructions.get(i).format2.contains(instructions.get(i).opcode) &&
+                    !instructions.get(i).format3.contains(instructions.get(i).opcode) &&
+                    !instructions.get(i).format4.contains(instructions.get(i).opcode))
+            {
+                instructions.get(i).Error = "ERROR: UNRECOGNIZED OPERATION CODE";
+            }
+            else if(instructions.get(i).opcode.equals("+TIXR") || instructions.get(i).opcode.equals("+COMR") || instructions.get(i).opcode.equals("+SUBR") ||
+                    instructions.get(i).opcode.equals("+RMO"))
+            {
+                instructions.get(i).Error = "ERROR: INSTRUCTION CAN'T BE FORMAT 4";
+            }
+            else if(instructions.get(i).opcode.equals("S") || instructions.get(i).opcode.equals("A") || instructions.get(i).opcode.equals("T") || instructions.get(i).opcode.equals("F")
+                    || instructions.get(i).opcode.equals("X") || instructions.get(i).opcode.startsWith("C'") || instructions.get(i).opcode.startsWith("X'")
+                    || instructions.get(i).opcode.startsWith("*") || instructions.get(i).opcode.startsWith("@") || instructions.get(i).opcode.startsWith("#"))
+            {
+                instructions.get(i).Error = "ERROR: MISSING OR MISPLACD OPERATION MNEMONIC";
+            }
+            else if(dir.directives.contains(instructions.get(i).opcode) && instructions.get(i).label.isEmpty())
+            {
+                instructions.get(i).Error = "ERROR: DIRECTIVE IS MISSING A LABEL";
+            }
+            else if(instructions.get(i).opcode.equals("RESW") || instructions.get(i).opcode.equals("RESB"))
+            {
+                try {
+                        double d = Double.parseDouble(instructions.get(i).operand1);
+                    } catch (NumberFormatException | NullPointerException nfe) {
+                           instructions.get(i).Error = "ERROR: NON NUMERIC OPERAND";
+                    }
+            }
+            else if(!instructions.get(instructions.size()-1).opcode.equals("END"))
+            {
+                   instructions.get(i).Error = "ERROR: MISSING END STATEMENT";
+            }
+            else if(instructions.get(i).operand1.startsWith("+") || instructions.get(i).operand2.startsWith("+"))
+            {
+                   instructions.get(i).Error = "ERROR: WRONG OPERAND PREFIX";
+            }            
+        }
+    }
+    
+    private void analyseInstructions()
+    {
+        for(int i = 0; i < instructions.size();i++)
+        {
+            if(instructions.get(i).opcode.equals("START"))
+            {
+                for(int j = 0; j <= i; j++)
+                {
+                    instructions.get(j).address = instructions.get(i).operand1;
+                }
+                PC = instructions.get(i).operand1;
+            }
+            
         }
     }
 }
