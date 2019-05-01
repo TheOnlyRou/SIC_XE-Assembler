@@ -192,12 +192,18 @@ public class SIC_XE_Assembler {
             }            
             else if(instructions.get(i).operand1.startsWith("+") || instructions.get(i).operand2.startsWith("+"))
             {
-                   instructions.get(i).Error = "ERROR: WRONG OPERAND PREFIX";
-            }            
+                instructions.get(i).Error = "ERROR: WRONG OPERAND PREFIX";
+            } 
+            else if(instructions.get(i).opcode.startsWith("#") || instructions.get(i).opcode.startsWith("%") ||
+                    instructions.get(i).opcode.startsWith("*") || instructions.get(i).opcode.startsWith("$")
+                    || instructions.get(i).opcode.startsWith("@"))
+            {
+                instructions.get(i).Error = "ERROR: WRONG OPERATION PREFIX";
+            }
         }
         if(!instructions.get(instructions.size()-1).opcode.equals("END"))
             {
-                   instructions.get(instructions.size()-1).Error = "ERROR: MISSING END STATEMENT";
+                instructions.get(instructions.size()-1).Error = "ERROR: MISSING END STATEMENT";
             }
     }
     
