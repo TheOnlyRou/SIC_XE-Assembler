@@ -507,7 +507,7 @@ public class SIC_XE_Assembler {
                     }
                     if(!defined1)
                     {
-                        instructions.get(i).Error = "ERROR: UNDEFINED SYMBOL " + instructions.get(i).operand2;
+                        instructions.get(i).Error = "ERROR: UNDEFINED SYMBOL " + instructions.get(i).operand1;
                     }                    
                 }
             }
