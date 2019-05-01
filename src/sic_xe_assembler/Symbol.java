@@ -2,14 +2,23 @@
 package sic_xe_assembler;
 
 public class Symbol {
-    int size;
+
     String data;
     String name;
+    String type;
+    int size;
     
-    public Symbol(String name, int size, String data)
+    public Symbol(String name, String data, String type)
     {
-        this.name=name;
-        this.size=size;
-        this.data=data;
+        this.name = name;
+        this.data = data;
+        this.type = type;
+    }
+    
+    public Symbol(String name, int size, String type)
+    {
+        this.name = name;
+        this.size = size;
+        this.type = type;
     }
 }

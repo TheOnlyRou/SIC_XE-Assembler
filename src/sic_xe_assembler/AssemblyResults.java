@@ -5,18 +5,63 @@
  */
 package sic_xe_assembler;
 
+import java.awt.Insets;
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author user
  */
 public class AssemblyResults extends javax.swing.JFrame {
-
-
+    
     public AssemblyResults() {
+        
+    }
+    
+    public void run()
+    {
         this.setVisible(true);
         initComponents();
         setResizable(false);
         setLocationRelativeTo(null);
+    }
+    
+    public void displayResults(ArrayList<Instruction> instructions, ArrayList<Symbol> symbols)
+    {
+        for(int i = 0; i<instructions.size();i++)
+        {           
+            String test = "" + i;
+            if(!instructions.get(i).address.isEmpty())
+                test = test + "\t" + instructions.get(i).address;
+            if(!instructions.get(i).comment.isEmpty())
+                test = test + "\t" + instructions.get(i).comment;
+            if(!instructions.get(i).label.isEmpty())
+                test = test + "\t" + instructions.get(i).label;
+            if(!instructions.get(i).opcode.isEmpty())
+                test = test + "\t" + instructions.get(i).opcode;
+            if(!instructions.get(i).operand1.isEmpty())
+                test = test + "\t" + instructions.get(i).operand1;
+            if(!instructions.get(i).operand2.isEmpty())
+                test = test + "\t" + instructions.get(i).operand2;
+            jTextArea1.append(test + "\n");
+            if(!instructions.get(i).Error.isEmpty())
+                jTextArea1.append("\t"+instructions.get(i).Error + "\n");
+        }
+        DefaultTableModel model = new DefaultTableModel(new String[] { "Label", "Content", "Size" },0)
+        {
+            @Override
+            public boolean isCellEditable(int row, int column)
+            {
+                return false;
+            }
+        };
+        jTable1.setModel(model);        
+        jTable1.setFocusable(false);
+        for(int i = 0; i<symbols.size();i++)
+        {
+            model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).size + " * " + symbols.get(i).type});
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -31,6 +76,8 @@ public class AssemblyResults extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new java.awt.Dimension(960, 770));
+        setSize(new java.awt.Dimension(960, 770));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
@@ -47,11 +94,11 @@ public class AssemblyResults extends javax.swing.JFrame {
                 {null, null, null}
             },
             new String [] {
-                "Label", "Size", "Content"
+                "Label", "Content", "Size"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Object.class, java.lang.Object.class
+                java.lang.String.class, java.lang.String.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false
@@ -66,10 +113,17 @@ public class AssemblyResults extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setResizable(false);
+            jTable1.getColumnModel().getColumn(1).setResizable(false);
+            jTable1.getColumnModel().getColumn(2).setResizable(false);
+        }
 
         getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 120, 220, 590));
 
+        jTextArea1.setEditable(false);
         jTextArea1.setColumns(20);
+        jTextArea1.setFont(new java.awt.Font("Consolas", 0, 14)); // NOI18N
         jTextArea1.setRows(5);
         jTextArea1.setMargin(new java.awt.Insets(10, 10, 10, 10));
         jScrollPane1.setViewportView(jTextArea1);

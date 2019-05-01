@@ -16,7 +16,9 @@ public class SIC_XE_Assembler {
     File f;
     Editor editor = new Editor(this);
     Directive dir = new Directive();
+    AssemblyResults display = new AssemblyResults();
     ArrayList<Instruction> instructions = new ArrayList<Instruction>();
+    ArrayList<Symbol> symbols = new ArrayList<Symbol>();
     private String PC;
     private int[] memory = new int[1024];
     public final int BYTE = 8;
@@ -64,6 +66,7 @@ public class SIC_XE_Assembler {
     
     public void Assemble() throws FileNotFoundException, IOException
     {
+        PC = "";
         START = false;
         BufferedReader br = new BufferedReader(new FileReader(f)); 
         String st; 
@@ -77,15 +80,13 @@ public class SIC_XE_Assembler {
         testInstructions();
         detectErrors();
         analyseInstructions();
+        display.run();
+        display.displayResults(instructions, symbols);
     }
     
     private void stringToInstruction(String text)
     {
         String[] result = text.split("\\s");
-        for(int i =0; i<result.length;i++)
-        {
-            System.out.println(i + "\t" + result[i]);
-        }
         if(result[0].startsWith("."))
         {
             instructions.add(new Instruction(text,true));
@@ -154,7 +155,7 @@ public class SIC_XE_Assembler {
             }
             else if(!instructions.get(i).opcode.isEmpty() && !instructions.get(i).format2.contains(instructions.get(i).opcode) &&
                     !instructions.get(i).format3.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format4.contains(instructions.get(i).opcode))
+                    !instructions.get(i).format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode))
             {
                 instructions.get(i).Error = "ERROR: UNRECOGNIZED OPERATION CODE";
             }
@@ -180,16 +181,16 @@ public class SIC_XE_Assembler {
                     } catch (NumberFormatException | NullPointerException nfe) {
                            instructions.get(i).Error = "ERROR: NON NUMERIC OPERAND";
                     }
-            }
-            else if(!instructions.get(instructions.size()-1).opcode.equals("END"))
-            {
-                   instructions.get(i).Error = "ERROR: MISSING END STATEMENT";
-            }
+            }            
             else if(instructions.get(i).operand1.startsWith("+") || instructions.get(i).operand2.startsWith("+"))
             {
                    instructions.get(i).Error = "ERROR: WRONG OPERAND PREFIX";
             }            
         }
+        if(!instructions.get(instructions.size()-1).opcode.equals("END"))
+            {
+                   instructions.get(instructions.size()-1).Error = "ERROR: MISSING END STATEMENT";
+            }
     }
     
     private void analyseInstructions()
@@ -203,7 +204,273 @@ public class SIC_XE_Assembler {
                     instructions.get(j).address = instructions.get(i).operand1;
                 }
                 PC = instructions.get(i).operand1;
-            }   
+            }
+            else if(!instructions.get(i).comment.isEmpty()){
+                
+            }                
+            else if(instructions.get(i).opcode.equals("+ADD")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("ADD")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("+SUB")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("SUB")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("LDCH")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("LDA")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("LDS")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("LDB")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("LDT")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("LDF")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("LDX")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }            
+            else if(instructions.get(i).opcode.equals("STCH")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("STA")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("STS")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("STB")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("STT")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("STF")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("COMP")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("TIX")){                
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("+LDCH")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+LDA")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+LDS")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+LDB")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+LDT")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+LDF")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+STCH")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+STA")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+STS")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+STB")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+STT")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+STF")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+COMP")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+TIX")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("JEQ")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("+JEQ")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("+JE")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }
+            else if(instructions.get(i).opcode.equals("JE")){
+                instructions.get(i).address=PC;
+                incrementPC(3);
+            }
+            else if(instructions.get(i).opcode.equals("+JLT")){
+                instructions.get(i).address=PC;
+                incrementPC(4);                
+            }
+            else if(instructions.get(i).opcode.equals("JLT")){
+                instructions.get(i).address=PC;
+                incrementPC(3);                
+            }
+            else if(instructions.get(i).opcode.equals("+JGT")){
+                instructions.get(i).address=PC;
+                incrementPC(4);                
+            }
+            else if(instructions.get(i).opcode.equals("JGT")){
+                instructions.get(i).address=PC;
+                incrementPC(3);                
+            }
+            else if(instructions.get(i).opcode.equals("RMO")){
+                instructions.get(i).address=PC;
+                incrementPC(2);
+            }
+            else if(instructions.get(i).opcode.equals("SUBR")){
+                instructions.get(i).address=PC;
+                incrementPC(2);
+            }
+            else if(instructions.get(i).opcode.equals("ADDR")){
+                instructions.get(i).address=PC;
+                incrementPC(2);
+            }
+            else if(instructions.get(i).opcode.equals("COMR")){                
+                instructions.get(i).address=PC;
+                incrementPC(2);
+            }
+            else if(instructions.get(i).opcode.equals("TIXR")){
+                
+                instructions.get(i).address=PC;
+                incrementPC(2);
+            }
+            else if(instructions.get(i).opcode.equals("BYTE")){                
+                instructions.get(i).address=PC;
+                incrementPC(1);
+                boolean newsymbol = true;
+                for(int j = 0; j<symbols.size();j++)
+                {
+                    if(symbols.get(j).name.equals(instructions.get(i).label))
+                        newsymbol = false;
+                }
+                if(newsymbol)
+                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"BYTE"));
+                else
+                    instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
+            }
+            else if(instructions.get(i).opcode.equals("WORD")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+                boolean newsymbol = true;
+                for(int j = 0; j<symbols.size();j++)
+                {
+                    if(symbols.get(j).name.equals(instructions.get(i).label))
+                        newsymbol = false;
+                }
+                if(newsymbol)
+                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"WORD"));
+                else
+                    instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
+            }
+            else if(instructions.get(i).opcode.equals("RESB")){
+                try{
+                    boolean newsymbol = true;
+                    String s = instructions.get(i).operand1;
+                    int z = Integer.parseInt(s.trim());
+                    incrementPC(z);
+                    instructions.get(i).address=PC;
+                    for(int j = 0; j<symbols.size();j++)
+                    {
+                        if(symbols.get(j).name.equals(instructions.get(i).label))
+                            newsymbol = false;
+                    }
+                    if(newsymbol)
+                        symbols.add(new Symbol(instructions.get(i).label,z,"BYTE"));
+                    else
+                        instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
+                }catch(NumberFormatException nfe){
+                    instructions.get(i).Error="ERROR: ILLEGAL TYPE OF OPERAND";                
+                }
+                    instructions.get(i).address=PC;
+                    incrementPC(1);                    
+                
+            }
+            else if(instructions.get(i).opcode.equals("RESW")){
+                try{
+                    boolean newsymbol = true;
+                    String s = instructions.get(i).operand1;
+                    int z = Integer.parseInt(s.trim());
+                    z=z*4;
+                    incrementPC(z);
+                    instructions.get(i).address=PC;
+                    for(int j = 0; j<symbols.size();j++)
+                    {
+                        if(symbols.get(j).name.equals(instructions.get(i).label))
+                            newsymbol = false;
+                    }
+                    if(newsymbol)
+                        symbols.add(new Symbol(instructions.get(i).label,z,"WORD"));
+                    else
+                        instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
+                }catch(NumberFormatException nfe){
+                    instructions.get(i).Error="ERROR: ILLEGAL TYPE OF OPERAND";                    
+                }   
+                instructions.get(i).address=PC;
+                incrementPC(4);                
+            }
+            else{
+                instructions.get(i).Error="ERROR: WRONG DIRECTIVE OR INSTRUCTION";
+            }
+            
         }
     }
 }

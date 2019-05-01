@@ -175,7 +175,7 @@ public class Editor extends javax.swing.JFrame {
         chooser.setFileFilter(filter);
         chooser.showOpenDialog(null);
         f = chooser.getSelectedFile();
-        if(f.canRead())
+        if(f!=null)
         {
             ass.f = f;
             System.out.println(ass.f.getAbsolutePath());
@@ -241,6 +241,11 @@ public class Editor extends javax.swing.JFrame {
             chooser.showOpenDialog(null);
             f = chooser.getSelectedFile();   
             ass.f = f;
+            try {
+                displayFile();
+            } catch (IOException ex) {
+                Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+            }
             System.out.println(ass.f.getAbsolutePath());
         }
         else
