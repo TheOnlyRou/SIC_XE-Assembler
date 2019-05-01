@@ -323,6 +323,10 @@ public class SIC_XE_Assembler {
                 instructions.get(i).address=PC;
                 incrementPC(4);
             }
+            else if(instructions.get(i).opcode.equals("+LDX")){
+                instructions.get(i).address=PC;
+                incrementPC(4);
+            }              
             else if(instructions.get(i).opcode.equals("+STCH")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
@@ -424,7 +428,7 @@ public class SIC_XE_Assembler {
             }
             else if(instructions.get(i).opcode.equals("WORD")){
                 instructions.get(i).address=PC;
-                incrementPC(4);
+                incrementPC(3);
                 boolean newsymbol = true;
                 for(int j = 0; j<symbols.size();j++)
                 {
@@ -441,8 +445,8 @@ public class SIC_XE_Assembler {
                     boolean newsymbol = true;
                     String s = instructions.get(i).operand1;
                     int z = Integer.parseInt(s.trim());
-                    incrementPC(z);
                     instructions.get(i).address=PC;
+                    incrementPC(z);
                     for(int j = 0; j<symbols.size();j++)
                     {
                         if(symbols.get(j).name.equals(instructions.get(i).label))
@@ -453,18 +457,17 @@ public class SIC_XE_Assembler {
                     else
                         instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
                 }catch(NumberFormatException nfe){
-                    instructions.get(i).Error="ERROR: ILLEGAL TYPE OF OPERAND";                
-                }
+                    instructions.get(i).Error="ERROR: ILLEGAL TYPE OF OPERAND";    
                     instructions.get(i).address=PC;
-                    incrementPC(1);                    
-                
+                    incrementPC(1);
+                }                
             }
             else if(instructions.get(i).opcode.equals("RESW")){
                 try{
                     boolean newsymbol = true;
                     String s = instructions.get(i).operand1;
                     int z = Integer.parseInt(s.trim());
-                    z=z*4;
+                    z=z*3;
                     incrementPC(z);
                     instructions.get(i).address=PC;
                     for(int j = 0; j<symbols.size();j++)
@@ -480,7 +483,7 @@ public class SIC_XE_Assembler {
                     instructions.get(i).Error="ERROR: ILLEGAL TYPE OF OPERAND";                    
                 }   
                 instructions.get(i).address=PC;
-                incrementPC(4);                
+                incrementPC(3);                
             }
             else if(instructions.get(i).opcode.equals("END"))
             {
@@ -488,6 +491,7 @@ public class SIC_XE_Assembler {
             }            
         }
     }
+    
     private void detectUndefinedSymbols()
     {
         for(int i=0; i<instructions.size();i++)
@@ -498,7 +502,7 @@ public class SIC_XE_Assembler {
                 if(!registers.contains(instructions.get(i).operand1) && !instructions.get(i).operand1.startsWith("C'")
                         && !instructions.get(i).operand1.startsWith("X'") && !instructions.get(i).operand1.startsWith(Character.toString('#'))
                         && !instructions.get(i).operand1.chars().allMatch(Character::isDigit)
-                        && !registers.contains(instructions.get(i).operand1))
+                        && !registers.contains(instructions.get(i).operand1)&& !instructions.get(i).operand2.startsWith("W'"))
                 {
                   //  System.out.println(instructions.get(i).operand1 + " is a register: " + registers.contains(instructions.get(i).operand1));
                     for(int j =0; j<symbols.size();j++)
@@ -523,7 +527,7 @@ public class SIC_XE_Assembler {
                 if(!registers.contains(instructions.get(i).operand2)
                     && !instructions.get(i).operand2.startsWith("C'") && !instructions.get(i).operand2.startsWith(Character.toString('#'))
                     && !instructions.get(i).operand2.startsWith("X'") && !instructions.get(i).operand2.chars().allMatch(Character::isDigit)
-                    && !registers.contains(instructions.get(i).operand2))
+                    && !instructions.get(i).operand2.startsWith("W'"))
                 {               
                     //System.out.println(instructions.get(i).operand2 + " is a register: " + registers.contains(instructions.get(i).operand2));
                     for(int j =0; j<symbols.size();j++)
