@@ -7,6 +7,7 @@ package sic_xe_assembler;
 
 import java.awt.Insets;
 import java.util.ArrayList;
+import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -23,6 +24,8 @@ public class AssemblyResults extends javax.swing.JFrame {
     {
         this.setVisible(true);
         initComponents();
+        setTitle("SIC/XE Assembler");
+        setIconImage(new ImageIcon(getClass().getResource("Icon.png")).getImage());
         setResizable(false);
         setLocationRelativeTo(null);
     }
@@ -60,7 +63,10 @@ public class AssemblyResults extends javax.swing.JFrame {
         jTable1.setFocusable(false);
         for(int i = 0; i<symbols.size();i++)
         {
-            model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).size + " * " + symbols.get(i).type});
+            if(symbols.get(i).size==0)
+                model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).type});
+            else
+                model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).size + " * " + symbols.get(i).type});
         }
     }
 

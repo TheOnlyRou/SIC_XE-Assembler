@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 
 
 public class Editor extends javax.swing.JFrame {
@@ -32,6 +33,8 @@ public class Editor extends javax.swing.JFrame {
     {
         this.setVisible(true);
         initComponents();
+        setTitle("SIC/XE Assembler");
+        setIconImage(new ImageIcon(getClass().getResource("Icon.png")).getImage());
         setResizable(false);
         setLocationRelativeTo(null);
         jTextArea1.setMargin(new Insets(10,10,10,10));

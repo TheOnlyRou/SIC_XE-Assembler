@@ -20,6 +20,7 @@ public class SIC_XE_Assembler {
     ArrayList<Instruction> instructions = new ArrayList<Instruction>();
     ArrayList<Symbol> symbols = new ArrayList<Symbol>();
     private String PC;
+    private String startAddress;
     private int[] memory = new int[1024];
     public final int BYTE = 8;
     public final int WORD = 24;
@@ -34,6 +35,7 @@ public class SIC_XE_Assembler {
     public boolean STARTDEC = false;
     public boolean ENDDEC = false;
     Set<Character> hex = new HashSet<Character>();
+    Set<String> registers = new HashSet<String>();
             
     public static void main(String[] args) 
     {
@@ -54,6 +56,11 @@ public class SIC_XE_Assembler {
         ass.hex.add('8');
         ass.hex.add('9');
         ass.hex.add('0');
+        ass.registers.add("A");
+        ass.registers.add("S");
+        ass.registers.add("T");
+        ass.registers.add("X");
+        ass.registers.add("F");
         ass.editor.run();
     }
     
@@ -80,6 +87,7 @@ public class SIC_XE_Assembler {
         testInstructions();
         detectErrors();
         analyseInstructions();
+        detectUndefinedSymbols();
         display.run();
         display.displayResults(instructions, symbols);
     }
@@ -155,7 +163,7 @@ public class SIC_XE_Assembler {
             }
             else if(!instructions.get(i).opcode.isEmpty() && !instructions.get(i).format2.contains(instructions.get(i).opcode) &&
                     !instructions.get(i).format3.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode))
+                    !instructions.get(i).format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode) && !instructions.get(i).opcode.equals("END"))
             {
                 instructions.get(i).Error = "ERROR: UNRECOGNIZED OPERATION CODE";
             }
@@ -204,6 +212,7 @@ public class SIC_XE_Assembler {
                     instructions.get(j).address = instructions.get(i).operand1;
                 }
                 PC = instructions.get(i).operand1;
+                startAddress = PC;
             }
             else if(!instructions.get(i).comment.isEmpty()){
                 
@@ -348,11 +357,11 @@ public class SIC_XE_Assembler {
                 instructions.get(i).address=PC;
                 incrementPC(4);
             }
-            else if(instructions.get(i).opcode.equals("+JE")){
+            else if(instructions.get(i).opcode.equals("+J")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
             }
-            else if(instructions.get(i).opcode.equals("JE")){
+            else if(instructions.get(i).opcode.equals("J")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
             }
@@ -467,10 +476,66 @@ public class SIC_XE_Assembler {
                 instructions.get(i).address=PC;
                 incrementPC(4);                
             }
-            else{
-                instructions.get(i).Error="ERROR: WRONG DIRECTIVE OR INSTRUCTION";
-            }
-            
+            else if(instructions.get(i).opcode.equals("END"))
+            {
+                instructions.get(i).address = startAddress;
+            }            
         }
     }
+    private void detectUndefinedSymbols()
+    {
+        for(int i=0; i<instructions.size();i++)
+        {
+            if(!instructions.get(i).operand1.equals(""))
+            {   
+                boolean defined1 = false;                
+                if(!registers.contains(instructions.get(i).operand1) && !instructions.get(i).operand1.startsWith("C'")
+                        && !instructions.get(i).operand1.startsWith("X'") && !instructions.get(i).operand1.startsWith(Character.toString('#'))
+                        && !instructions.get(i).operand1.chars().allMatch(Character::isDigit)
+                        && !registers.contains(instructions.get(i).operand1))
+                {
+                  //  System.out.println(instructions.get(i).operand1 + " is a register: " + registers.contains(instructions.get(i).operand1));
+                    for(int j =0; j<symbols.size();j++)
+                    {
+                        if(instructions.get(i).operand1.equals(symbols.get(j).name))
+                            defined1 = true;
+                    }
+                    for(int j = 0; j<instructions.size();j++)
+                    {
+                        if(instructions.get(i).operand1.equals(instructions.get(j).label))
+                            defined1 = true;
+                    }
+                    if(!defined1)
+                    {
+                        instructions.get(i).Error = "ERROR: UNDEFINED SYMBOL " + instructions.get(i).operand2;
+                    }                    
+                }
+            }
+            if(!instructions.get(i).operand2.equals(""))
+            {
+                boolean defined2 = false;
+                if(!registers.contains(instructions.get(i).operand2)
+                    && !instructions.get(i).operand2.startsWith("C'") && !instructions.get(i).operand2.startsWith(Character.toString('#'))
+                    && !instructions.get(i).operand2.startsWith("X'") && !instructions.get(i).operand2.chars().allMatch(Character::isDigit)
+                    && !registers.contains(instructions.get(i).operand2))
+                {               
+                    //System.out.println(instructions.get(i).operand2 + " is a register: " + registers.contains(instructions.get(i).operand2));
+                    for(int j =0; j<symbols.size();j++)
+                    {
+                        if(instructions.get(i).operand2.equals(symbols.get(j).name))
+                         defined2 = true;
+                    }
+                    for(int j = 0; j<instructions.size();j++)
+                    {
+                        if(instructions.get(i).operand2.equals(instructions.get(j).label))
+                        defined2 = true;
+                    }                
+                    if(!defined2)
+                    {
+                        instructions.get(i).Error = "ERROR: UNDEFINED SYMBOL " + instructions.get(i).operand2;
+                    }                    
+                }
+            }
+        }
+    }     
 }
