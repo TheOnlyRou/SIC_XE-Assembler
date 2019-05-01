@@ -410,7 +410,11 @@ public class SIC_XE_Assembler {
             }
             else if(instructions.get(i).opcode.equals("BYTE")){                
                 instructions.get(i).address=PC;
-                incrementPC(1);
+                if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C")){
+                    int c = instructions.get(i).operand1.length();
+                    c=c-3;
+                    incrementPC(c);
+                }
                 boolean newsymbol = true;
                 for(int j = 0; j<symbols.size();j++)
                 {
@@ -424,7 +428,7 @@ public class SIC_XE_Assembler {
             }
             else if(instructions.get(i).opcode.equals("WORD")){
                 instructions.get(i).address=PC;
-                incrementPC(4);
+                incrementPC(3);
                 boolean newsymbol = true;
                 for(int j = 0; j<symbols.size();j++)
                 {
@@ -437,12 +441,12 @@ public class SIC_XE_Assembler {
                     instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
             }
             else if(instructions.get(i).opcode.equals("RESB")){
+                instructions.get(i).address=PC;
                 try{
                     boolean newsymbol = true;
                     String s = instructions.get(i).operand1;
                     int z = Integer.parseInt(s.trim());
                     incrementPC(z);
-                    instructions.get(i).address=PC;
                     for(int j = 0; j<symbols.size();j++)
                     {
                         if(symbols.get(j).name.equals(instructions.get(i).label))
@@ -462,11 +466,11 @@ public class SIC_XE_Assembler {
             else if(instructions.get(i).opcode.equals("RESW")){
                 try{
                     boolean newsymbol = true;
+                    instructions.get(i).address=PC;
                     String s = instructions.get(i).operand1;
                     int z = Integer.parseInt(s.trim());
                     z=z*4;
                     incrementPC(z);
-                    instructions.get(i).address=PC;
                     for(int j = 0; j<symbols.size();j++)
                     {
                         if(symbols.get(j).name.equals(instructions.get(i).label))
