@@ -6,19 +6,22 @@ public class Symbol {
     String data;
     String name;
     String type;
+    String address;
     int size;
     
-    public Symbol(String name, String data, String type)
+    public Symbol(String name, String data, String type,String address)
     {
         this.name = name;
         this.data = data;
         this.type = type;
+        this.address = address;
     }
     
-    public Symbol(String name, int size, String type)
+    public Symbol(String name, int size, String type,String address)
     {
         this.name = name;
         this.size = size;
         this.type = type;
+        this.address = address;
     }
 }
