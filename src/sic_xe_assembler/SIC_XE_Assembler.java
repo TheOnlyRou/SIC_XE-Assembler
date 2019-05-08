@@ -412,6 +412,21 @@ public class SIC_XE_Assembler {
                 instructions.get(i).address=PC;
                 incrementPC(2);
             }
+            else if(instructions.get(i).opcode.equals("EQU")){
+                //address calculation here
+                boolean newsymbol = true;
+                for(int j=0;j<symbols.size();j++){
+                    if(symbols.get(j).name.equals(instructions.get(i).label)){
+                        newsymbol= false;
+                    }
+                }
+                if(newsymbol)
+                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"EQU",instructions.get(i).address));
+                else
+                    instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
+                instructions.get(i).address=PC;
+                incrementPC(2);
+            }
             else if(instructions.get(i).opcode.equals("BYTE")){                
                 instructions.get(i).address=PC;
                 if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C")){
@@ -426,7 +441,7 @@ public class SIC_XE_Assembler {
                         newsymbol = false;
                 }
                 if(newsymbol)
-                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"BYTE"));
+                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"BYTE",instructions.get(i).address));
                 else
                     instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
             }
@@ -440,7 +455,7 @@ public class SIC_XE_Assembler {
                         newsymbol = false;
                 }
                 if(newsymbol)
-                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"WORD"));
+                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"WORD",instructions.get(i).address));
                 else
                     instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
             }
@@ -457,7 +472,7 @@ public class SIC_XE_Assembler {
                             newsymbol = false;
                     }
                     if(newsymbol)
-                        symbols.add(new Symbol(instructions.get(i).label,z,"BYTE"));
+                        symbols.add(new Symbol(instructions.get(i).label,z,"BYTE",instructions.get(i).address));
                     else
                         instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
                 }catch(NumberFormatException nfe){
@@ -480,7 +495,7 @@ public class SIC_XE_Assembler {
                             newsymbol = false;
                     }
                     if(newsymbol)
-                        symbols.add(new Symbol(instructions.get(i).label,z,"WORD"));
+                        symbols.add(new Symbol(instructions.get(i).label,z,"WORD",instructions.get(i).address));
                     else
                         instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
                 }catch(NumberFormatException nfe){
@@ -491,8 +506,21 @@ public class SIC_XE_Assembler {
             }
             else if(instructions.get(i).opcode.equals("END"))
             {
+                if(instructions.get(i).label!=null){
+                    instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
+                }
+                instructions.get(i).address = startAddress;
+            }
+            else if(instructions.get(i).opcode.equals("ORG")){
+                PC = instructions.get(i).operand1;
+            }
+            {
+                if(instructions.get(i).label!=null){
+                    instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
+                }
                 instructions.get(i).address = startAddress;
             }            
+                    
         }
     }
     
