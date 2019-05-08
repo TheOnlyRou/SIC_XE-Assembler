@@ -429,7 +429,11 @@ public class SIC_XE_Assembler {
             }
             else if(instructions.get(i).opcode.equals("BYTE")){                
                 instructions.get(i).address=PC;
-                incrementPC(1);
+                if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C")){
+                    int c = instructions.get(i).operand1.length();
+                    c=c-3;
+                    incrementPC(c);
+                }
                 boolean newsymbol = true;
                 for(int j = 0; j<symbols.size();j++)
                 {
@@ -524,7 +528,7 @@ public class SIC_XE_Assembler {
     {
         for(int i=0; i<instructions.size();i++)
         {
-            if(!instructions.get(i).operand1.equals(""))
+            if(!instructions.get(i).operand1.equals("") && !instructions.get(i).opcode.equals("START"))
             {   
                 boolean defined1 = false;                
                 if(!registers.contains(instructions.get(i).operand1) && !instructions.get(i).operand1.startsWith("C'")
@@ -549,7 +553,7 @@ public class SIC_XE_Assembler {
                     }                    
                 }
             }
-            if(!instructions.get(i).operand2.equals(""))
+            if(!instructions.get(i).operand2.equals("") && !instructions.get(i).opcode.equals("START"))
             {
                 boolean defined2 = false;
                 if(!registers.contains(instructions.get(i).operand2)
