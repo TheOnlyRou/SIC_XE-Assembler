@@ -51,7 +51,7 @@ public class AssemblyResults extends javax.swing.JFrame {
             if(!instructions.get(i).Error.isEmpty())
                 jTextArea1.append("\t"+instructions.get(i).Error + "\n");
         }
-        DefaultTableModel model = new DefaultTableModel(new String[] { "Label", "Content", "Size" },0)
+        DefaultTableModel model = new DefaultTableModel(new String[] { "Label", "Content", "Size", "Address" },0)
         {
             @Override
             public boolean isCellEditable(int row, int column)
@@ -64,9 +64,9 @@ public class AssemblyResults extends javax.swing.JFrame {
         for(int i = 0; i<symbols.size();i++)
         {
             if(symbols.get(i).size==0)
-                model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).type});
+                model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).type,symbols.get(i).address});
             else
-                model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).size + " * " + symbols.get(i).type});
+                model.addRow(new Object[]{symbols.get(i).name,symbols.get(i).data,symbols.get(i).size + " * " + symbols.get(i).type,symbols.get(i).address});
         }
     }
 

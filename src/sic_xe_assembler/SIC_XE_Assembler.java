@@ -157,28 +157,36 @@ public class SIC_XE_Assembler {
                 }
                 instructions.get(i).address = instructions.get(i).operand1;
             }
-            else if(instructions.get(i).comment.isEmpty() && !START)
+            else if(instructions.get(i).comment.equals("") && !START)
             {
                 instructions.get(i).Error = "ERROR: MISSING START STATEMENT";
             }
-            else if(!instructions.get(i).opcode.isEmpty() && !instructions.get(i).format2.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format3.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode) && !instructions.get(i).opcode.equals("END"))
+             else if(instructions.get(i).opcode.startsWith("#") || instructions.get(i).opcode.startsWith("%") ||
+                    instructions.get(i).opcode.startsWith("*") || instructions.get(i).opcode.startsWith("$")
+                    || instructions.get(i).opcode.startsWith("@"))
             {
-                instructions.get(i).Error = "ERROR: UNRECOGNIZED OPERATION CODE";
+                instructions.get(i).Error = "ERROR: WRONG OPERATION PREFIX";
             }
-            else if(instructions.get(i).opcode.equals("+TIXR") || instructions.get(i).opcode.equals("+COMR") || instructions.get(i).opcode.equals("+SUBR") ||
-                    instructions.get(i).opcode.equals("+RMO"))
-            {
-                instructions.get(i).Error = "ERROR: INSTRUCTION CAN'T BE FORMAT 4";
-            }
-            else if(instructions.get(i).opcode.equals("S") || instructions.get(i).opcode.equals("A") || instructions.get(i).opcode.equals("T") || instructions.get(i).opcode.equals("F")
+             
+             else if(instructions.get(i).opcode.equals("S") || instructions.get(i).opcode.equals("A") || instructions.get(i).opcode.equals("T") || instructions.get(i).opcode.equals("F")
                     || instructions.get(i).opcode.equals("X") || instructions.get(i).opcode.startsWith("C'") || instructions.get(i).opcode.startsWith("X'")
                     || instructions.get(i).opcode.startsWith("*") || instructions.get(i).opcode.startsWith("@") || instructions.get(i).opcode.startsWith("#"))
             {
                 instructions.get(i).Error = "ERROR: MISSING OR MISPLACD OPERATION MNEMONIC";
             }
-            else if(dir.directives.contains(instructions.get(i).opcode) && instructions.get(i).label.isEmpty())
+             else if(instructions.get(i).opcode.equals("+TIXR") || instructions.get(i).opcode.equals("+COMR") || instructions.get(i).opcode.equals("+SUBR") ||
+                    instructions.get(i).opcode.equals("+RMO"))
+            {
+                instructions.get(i).Error = "ERROR: INSTRUCTION CAN'T BE FORMAT 4";
+            }
+            else if(!instructions.get(i).opcode.equals("") && !instructions.get(i).format2.contains(instructions.get(i).opcode) &&
+                    !instructions.get(i).format3.contains(instructions.get(i).opcode) &&
+                    !instructions.get(i).format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode) && !instructions.get(i).opcode.equals("END"))
+            {
+                instructions.get(i).Error = "ERROR: UNRECOGNIZED OPERATION CODE";
+            }
+            
+            else if(dir.directives.contains(instructions.get(i).opcode) && instructions.get(i).label.equals(""))
             {
                 instructions.get(i).Error = "ERROR: DIRECTIVE IS MISSING A LABEL";
             }
@@ -194,12 +202,22 @@ public class SIC_XE_Assembler {
             {
                 instructions.get(i).Error = "ERROR: WRONG OPERAND PREFIX";
             } 
-            else if(instructions.get(i).opcode.startsWith("#") || instructions.get(i).opcode.startsWith("%") ||
-                    instructions.get(i).opcode.startsWith("*") || instructions.get(i).opcode.startsWith("$")
-                    || instructions.get(i).opcode.startsWith("@"))
-            {
-                instructions.get(i).Error = "ERROR: WRONG OPERATION PREFIX";
-            }
+           
+             if(instructions.get(i).format2.contains(instructions.get(i).opcode) || instructions.get(i).opcode.equals("ADDR")){
+                 if (!registers.contains(instructions.get(i).operand1)){
+                     instructions.get(i).Error = "ERROR: OPERAND 1 IS NOT A REGISTER";
+                 }
+                 if (!registers.contains(instructions.get(i).operand2) && !instructions.get(i).operand2.equals("")){
+                     instructions.get(i).Error = "ERROR: OPERAND 2 IS NOT A REGISTER";
+                 }
+             }
+             if (instructions.get(i).opcode.equals("ADDR") || instructions.get(i).opcode.equals("SUBR") || instructions.get(i).opcode.equals("RMO") || instructions.get(i).opcode.equals("COMR")){
+              
+                 if(instructions.get(i).operand2.equals("")){
+                     
+                    instructions.get(i).Error = "ERROR: OPERAND 2 MISSING";
+                 }
+                     }
         }
         if(!instructions.get(instructions.size()-1).opcode.equals("END"))
             {
@@ -220,7 +238,7 @@ public class SIC_XE_Assembler {
                 PC = instructions.get(i).operand1;
                 startAddress = PC;
             }
-            else if(!instructions.get(i).comment.isEmpty()){
+            else if(!instructions.get(i).comment.equals("")){
                 
             }                
             else if(instructions.get(i).opcode.equals("+ADD")){
@@ -414,6 +432,7 @@ public class SIC_XE_Assembler {
             }
             else if(instructions.get(i).opcode.equals("EQU")){
                 //address calculation here
+                
                 boolean newsymbol = true;
                 for(int j=0;j<symbols.size();j++){
                     if(symbols.get(j).name.equals(instructions.get(i).label)){
@@ -425,7 +444,11 @@ public class SIC_XE_Assembler {
                 else
                     instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
                 instructions.get(i).address=PC;
-                incrementPC(2);
+                if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C")){
+                    int c = instructions.get(i).operand1.length();
+                    c=c-3;
+                    incrementPC(c);
+                }
             }
             else if(instructions.get(i).opcode.equals("BYTE")){                
                 instructions.get(i).address=PC;
@@ -475,8 +498,7 @@ public class SIC_XE_Assembler {
                         symbols.add(new Symbol(instructions.get(i).label,z,"BYTE",instructions.get(i).address));
                     else
                         instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
-                }catch(NumberFormatException nfe){
-                    instructions.get(i).Error="ERROR: ILLEGAL TYPE OF OPERAND";    
+                }catch(NumberFormatException nfe){ 
                     instructions.get(i).address=PC;
                     incrementPC(1);
                 }                
@@ -499,25 +521,27 @@ public class SIC_XE_Assembler {
                     else
                         instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
                 }catch(NumberFormatException nfe){
-                    instructions.get(i).Error="ERROR: ILLEGAL TYPE OF OPERAND";                    
+                         
                 }   
                 instructions.get(i).address=PC;
                 incrementPC(3);                
             }
             else if(instructions.get(i).opcode.equals("END"))
-            {
-                if(instructions.get(i).label!=null){
+            { 
+                System.out.println(instructions.get(i).opcode);
+                if(!instructions.get(i).label.equals("")){
                     instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
                 }
                 instructions.get(i).address = startAddress;
             }
             else if(instructions.get(i).opcode.equals("ORG")){
                 PC = instructions.get(i).operand1;
-            }
+            
                 if(!instructions.get(i).label.equals("")){
                     instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
                 }
-                instructions.get(i).address = instructions.get(i).operand1;            
+                instructions.get(i).address = instructions.get(i).operand1;  
+            }
                     
         }
     }
