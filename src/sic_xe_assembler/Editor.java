@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 
 
 public class Editor extends javax.swing.JFrame {
@@ -38,6 +39,7 @@ public class Editor extends javax.swing.JFrame {
         setResizable(false);
         setLocationRelativeTo(null);
         jTextArea1.setMargin(new Insets(10,10,10,10));
+        jDialog1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
     public File exportFile()
@@ -236,6 +238,7 @@ public class Editor extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        ass.newFile();
         if(jTextArea1.getText().equals(""))
         {
             JFileChooser chooser = new JFileChooser();
@@ -243,17 +246,33 @@ public class Editor extends javax.swing.JFrame {
             chooser.setFileFilter(filter);
             chooser.showOpenDialog(null);
             f = chooser.getSelectedFile();   
-            ass.f = f;
-            try {
-                displayFile();
-            } catch (IOException ex) {
-                Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+            if(f!=null)
+            {
+                ass.f = f;
+                try {
+                    displayFile();
+                } catch (IOException ex) {
+                    Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                System.out.println(ass.f.getAbsolutePath());
             }
-            System.out.println(ass.f.getAbsolutePath());
+            else
+            {
+                jDialog1.setVisible(true);
+                jButton1.setVisible(false);
+                jButton2.setVisible(true);
+                jDialog1.setTitle("File does not exist"); 
+                jDialog1.setLocationRelativeTo(null);
+                jLabel2.setText("File specified does not exist. Please try again");
+            }
         }
         else
         {
-            saveFile();
+            try {
+                tempFile();
+            } catch (IOException ex) {
+                Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         
         if(f.canRead())
@@ -275,6 +294,13 @@ public class Editor extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
+    private void tempFile() throws IOException
+    {
+        BufferedWriter outFile = new BufferedWriter(new FileWriter("temp.txt"));
+        jTextArea1.write(outFile);        
+        f = new File("temp.txt");
+        ass.f = f;
+    }
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         saveFile();
     }//GEN-LAST:event_jMenuItem3ActionPerformed
