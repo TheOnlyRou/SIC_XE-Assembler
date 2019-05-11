@@ -1,18 +1,20 @@
-.  if y>=6 then e = 5y else e = y+10
+.23456789012345678901235678901234567890
+prog     start   0100
 .
-prog start 1000
-bgn LDA Y
-COMP #6
-JGT ELSE
-LDA #5
-MUL Y
-STA E
-J OUT
-ELSE LDA Y
-ADDR #10 , S
-STA E   
-OUT j OUT
+sum      macro   &L,&Res   
+         lda     &L[1]
+&n       set     2
+         while   (&n LE %items(&L))
+         add     &L[&n]
+&n       set     &n+1
+         endw
+         sta     &Res   
+         mend 
 .
-Y WORD 4  
-E RESW 1 
-END BGN
+bgn      sum     (G,G+3,G+6),G+9
+         j       *
+G        word    3
+         word    7
+         word    6
+         resw    1   
+         end

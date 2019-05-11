@@ -275,7 +275,7 @@ public class Editor extends javax.swing.JFrame {
             }
         }
         
-        if(f.canRead())
+        if(f!=null)
         {
             try {
                 ass.Assemble();
