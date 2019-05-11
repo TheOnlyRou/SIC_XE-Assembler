@@ -13,6 +13,12 @@ public class Instruction {
     String label = "";
     String comment = "";
     String Error = "";
+    boolean n ;
+    boolean i ;
+    boolean x ;
+    boolean b ;
+    boolean p ;
+    boolean e ;
     
     private String[] arr2 = {"RMO", "SUBR", "TIXR", "COMR"};
     private String[] arr3 = {"LDA", "LDX", "LDS", "LDT", "LDF", "STA", "STX", "STS", "STT", "STF", 
@@ -62,5 +68,18 @@ public class Instruction {
         this.opcode = opcode;
         this.operand1 = op1;
         this.operand2 = op2;
+    }
+    public Instruction(String label, String opcode, String op1, String op2,boolean n,boolean i,boolean x,boolean b,boolean p,boolean e)
+    {
+        this.label = label;
+        this.opcode = opcode;
+        this.operand1 = op1;
+        this.operand2 = op2;
+        this.n=n;
+        this.i=i;
+        this.x=x;
+        this.b=b;
+        this.p=p;
+        this.e=e;
     }
 }

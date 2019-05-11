@@ -91,6 +91,9 @@ public class SIC_XE_Assembler {
         display.run();
         display.displayResults(instructions, symbols);
     }
+    public void Simulate() throws FileNotFoundException, IOException{
+        
+    }
     
     private void stringToInstruction(String text)
     {
