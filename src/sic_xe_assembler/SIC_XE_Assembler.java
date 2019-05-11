@@ -506,19 +506,19 @@ public class SIC_XE_Assembler {
             }
             else if(instructions.get(i).opcode.equals("END"))
             {
-                if(instructions.get(i).label!=null){
-                    instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
+                if(!instructions.get(i).label.equals("")){
+                    instructions.get(i).Error = "ERROR: LABEL SHOULDN'T BE PRESENT";
                 }
                 instructions.get(i).address = startAddress;
             }
-            else if(instructions.get(i).opcode.equals("ORG")){
+            else if(instructions.get(i).opcode.equals("ORG"))
+            {
                 PC = instructions.get(i).operand1;
-            }
                 if(!instructions.get(i).label.equals("")){
-                    instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
+                    instructions.get(i).Error = "ERROR: LABEL SHOULDN'T BE PRESENT";
                 }
                 instructions.get(i).address = instructions.get(i).operand1;            
-                    
+            }        
         }
     }
     
