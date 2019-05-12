@@ -26,7 +26,7 @@ public class AssemblyResults extends javax.swing.JFrame {
     {
         this.setVisible(true);
         initComponents();
-        setTitle("SIC/XE Assembler");
+        setTitle("SIC/XE Assembler: Assembly");
         setIconImage(new ImageIcon(getClass().getResource("Icon.png")).getImage());
         setResizable(false);
         setLocationRelativeTo(null);
@@ -41,7 +41,7 @@ public class AssemblyResults extends javax.swing.JFrame {
     
     public void displayResults(ArrayList<Instruction> instructions, ArrayList<Symbol> symbols)
     {
-        DefaultTableModel model = new DefaultTableModel(new String[] { "Label", "Content", "Size", "Address" },0)
+        DefaultTableModel model = new DefaultTableModel(new String[] { "Label", "Address" },0)
         {
             @Override
             public boolean isCellEditable(int row, int column)
@@ -64,10 +64,14 @@ public class AssemblyResults extends javax.swing.JFrame {
             String test = "" + i;
             if(!instructions.get(i).address.isEmpty())
                 test = test + "\t" + instructions.get(i).address;
+            else
+                test = test+ "\t";            
             if(!instructions.get(i).comment.isEmpty())
                 test = test + "\t" + instructions.get(i).comment;
             if(!instructions.get(i).label.isEmpty())
                 test = test + "\t" + instructions.get(i).label;
+            else
+                test = test+ "\t";            
             if(!instructions.get(i).opcode.isEmpty())
                 test = test + "\t" + instructions.get(i).opcode;
             if(!instructions.get(i).operand1.isEmpty())
@@ -82,10 +86,7 @@ public class AssemblyResults extends javax.swing.JFrame {
         jTable1.setFocusable(false);
         for(int i = 0; i<symbols.size();i++)
         {
-            if(symbols.get(i).size==0)
-                model.addRow(new Object[]{ symbols.get(i).name, symbols.get(i).data , symbols.get(i).type,symbols.get(i).address});
-            else
-                model.addRow(new Object[]{ symbols.get(i).name, symbols.get(i).data , symbols.get(i).size + " * " + symbols.get(i).type , symbols.get(i).address});
+                model.addRow(new Object[]{ symbols.get(i).name , symbols.get(i).address});
         }
         jTextArea1.append("\n\nPRESS ENTER KEY TO CONTINUE...");
         update(this.getGraphics());

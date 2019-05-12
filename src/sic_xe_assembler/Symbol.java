@@ -24,4 +24,10 @@ public class Symbol {
         this.type = type;
         this.address = address;
     }
+    
+    public Symbol(String name, String address)
+    {
+        this.name = name;
+        this.address = address;
+    }
 }

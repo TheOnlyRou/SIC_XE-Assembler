@@ -94,7 +94,7 @@ public class SIC_XE_Assembler {
     
     private void stringToInstruction(String text)
     {
-        String[] result = text.split("\\s");
+        String[] result = text.split("\\s+");
         if(result[0].startsWith("."))
         {
             instructions.add(new Instruction(text,true));
@@ -155,13 +155,18 @@ public class SIC_XE_Assembler {
                         instructions.get(i).Error = "ERROR: ADDRESS IS NOT HEXADECIMAL";
                     }
                 }
-                instructions.get(i).address = instructions.get(i).operand1;
+                if(instructions.get(i).Error.equals(""))
+                    instructions.get(i).address = instructions.get(i).operand1;
+                else
+                    instructions.get(i).address = "1000";
             }
             else if(instructions.get(i).comment.equals("") && !START)
             {
                 instructions.get(i).Error = "ERROR: MISSING START STATEMENT";
+                instructions.get(i).address = "1000";
+                START = true;
             }
-             else if(instructions.get(i).opcode.startsWith("#") || instructions.get(i).opcode.startsWith("%") ||
+            else if(instructions.get(i).opcode.startsWith("#") || instructions.get(i).opcode.startsWith("%") ||
                     instructions.get(i).opcode.startsWith("*") || instructions.get(i).opcode.startsWith("$")
                     || instructions.get(i).opcode.startsWith("@"))
             {
@@ -202,22 +207,30 @@ public class SIC_XE_Assembler {
             {
                 instructions.get(i).Error = "ERROR: WRONG OPERAND PREFIX";
             } 
-           
-             if(instructions.get(i).format2.contains(instructions.get(i).opcode) || instructions.get(i).opcode.equals("ADDR")){
-                 if (!registers.contains(instructions.get(i).operand1)){
-                     instructions.get(i).Error = "ERROR: OPERAND 1 IS NOT A REGISTER";
-                 }
-                 if (!registers.contains(instructions.get(i).operand2) && !instructions.get(i).operand2.equals("")){
-                     instructions.get(i).Error = "ERROR: OPERAND 2 IS NOT A REGISTER";
-                 }
-             }
-             if (instructions.get(i).opcode.equals("ADDR") || instructions.get(i).opcode.equals("SUBR") || instructions.get(i).opcode.equals("RMO") || instructions.get(i).opcode.equals("COMR")){
-              
+            else if((instructions.get(i).format3.contains(instructions.get(i).opcode) || instructions.get(i).format4.contains(instructions.get(i).opcode)))
+            {
+                if(!instructions.get(i).operand2.equals(""))
+                {
+                    instructions.get(i).Error = "ERROR: THIS OPERATION ACCEPTS ONLY 1 OPERAND";
+                }
+            }           
+            else if(instructions.get(i).format2.contains(instructions.get(i).opcode)){
+                if (!registers.contains(instructions.get(i).operand1))
+                {
+                    instructions.get(i).Error = "ERROR: OPERAND 1 IS NOT A REGISTER";
+                }
+                if (!registers.contains(instructions.get(i).operand2) && !instructions.get(i).operand2.equals("") && !instructions.get(i).opcode.equals("TIXR"))
+                {
+                    instructions.get(i).Error = "ERROR: OPERAND 2 IS NOT A REGISTER";
+                }
+            }
+            else if (instructions.get(i).opcode.equals("ADDR") || instructions.get(i).opcode.equals("SUBR") || instructions.get(i).opcode.equals("RMO") || instructions.get(i).opcode.equals("COMR"))
+            {
                  if(instructions.get(i).operand2.equals("")){
                      
                     instructions.get(i).Error = "ERROR: OPERAND 2 MISSING";
                  }
-                     }
+            }
         }
         if(!instructions.get(instructions.size()-1).opcode.equals("END"))
         {
@@ -227,6 +240,17 @@ public class SIC_XE_Assembler {
     
 private void analyseInstructions()
     {
+        boolean addfound=false;
+        int count = 0;
+        while(!addfound && count<instructions.size())
+        {
+            if(!instructions.get(count).address.equals(""))
+            {
+                PC = instructions.get(count).address;
+                addfound = true;
+            }
+            count++;
+        }        
         for(int i = 0; i < instructions.size();i++)
         {
             if(instructions.get(i).opcode.equals("START"))
@@ -540,9 +564,19 @@ private void analyseInstructions()
                 if(!instructions.get(i).label.equals("")){
                     instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
                 }
-                instructions.get(i).address = instructions.get(i).operand1;  
+                instructions.get(i).address =  instructions.get(i).operand1;  
             }
-                    
+            if(!instructions.get(i).label.equals(""))
+            {
+                boolean newsymbol=true;
+                for(int j = 0; j<symbols.size();j++)
+                {
+                    if(symbols.get(j).name.equals(instructions.get(i).label))
+                    newsymbol = false;
+                }
+                if(newsymbol)
+                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).address));
+            }
         }
     }
     
@@ -603,9 +637,132 @@ private void analyseInstructions()
         }
     }   
     
+    public void simulate()
+    {
+        boolean ERROR=false;
+        for (Instruction instruction : instructions) {
+            if(!instruction.Error.equals(""))
+                ERROR=true;
+        }
+        if(ASSEMBLED && !ERROR)
+        {
+            generateNIXBPE();
+        }
+        else
+        {
+            if(ERROR)
+                this.editor.displayError("Assembly incomplete", "Please fix the code errors and try again");                
+            else if(!ASSEMBLED)
+                this.editor.displayError("Assembly incomplete", "Please assemble a file and try again");
+        }   
+    }
+    
+    private void generateNIXBPE()
+    {
+        for(Instruction instruction: instructions)
+        {
+            if(instruction.operand1.startsWith("@"))
+            {
+                instruction.n = true;
+                instruction.i = false;
+                instruction.x = false;
+            }
+            else if(instruction.operand1.startsWith("#"))
+            {                
+                instruction.n = false;
+                instruction.i = true;
+                instruction.x = false;
+            }
+            else if(!instruction.operand2.equals(""))
+            {
+                instruction.n = true;
+                instruction.i = true;
+                instruction.x = true;
+            }
+            else{
+                instruction.n = true;
+                instruction.i = true;
+                instruction.x = false;
+            }
+            
+            char[] testLabel = instruction.operand1.toCharArray();
+            if(testLabel[0]=='#' || testLabel[0]=='@')
+            {
+                testLabel[0]=' ';                
+            }
+            String test = Arrays.toString(testLabel);
+            test = test.trim();
+            boolean LABEL = false;
+            char[] testarr = test.toCharArray();
+            for(int j = 0; j<testarr.length;j++)
+            {
+                if(!Character.isDigit(testarr[j]))
+                {
+                   LABEL = true; 
+                }
+            }
+            String address;
+            String nextAddress;
+            if(LABEL)
+            {
+                address = findAddress(test);
+                nextAddress = findNextAddress(instruction.address);                
+                int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
+                if(result >= -2048 && result <=2047)
+                {
+                    instruction.p = true;
+                    instruction.b = false;
+                }
+                else if(result<=4095)
+                {
+                    instruction.p = false;
+                    instruction.b = true;
+                }
+                else
+                    System.out.println("DISPLACEMENT OUT OF BOUNDS");               
+            }
+            else
+            {
+                int result = Integer.parseInt(test);  
+                instruction.b = false;
+                instruction.p = false;
+            }
+            
+            if(instruction.opcode.startsWith("+"))
+            {
+                instruction.e = true;
+            }            
+        }
+    }
+    
+    private String findAddress(String name)
+    {
+        for(Symbol sym:symbols)
+        {
+            if(sym.name.equals(name))
+            {
+                return sym.address;
+            }
+        }
+        return null;
+    }
+    
+    private String findNextAddress(String address)
+    {
+        for(int i=0; i<instructions.size();i++)
+        {
+            if(instructions.get(i).address.equals(address))
+            {
+                return instructions.get(i+1).address;
+            }
+        }
+        return null;
+    }
+    
     public void newFile()
     {
         this.f = null;
+        this.ASSEMBLED = false;
         this.START = false;
         this.instructions = new ArrayList<Instruction>();
         this.symbols = new ArrayList<Symbol>();

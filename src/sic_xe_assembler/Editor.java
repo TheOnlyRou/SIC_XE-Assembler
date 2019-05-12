@@ -47,6 +47,16 @@ public class Editor extends javax.swing.JFrame {
         return f;
     }    
     
+    public void displayError(String title, String error)
+    {
+        jDialog1.setVisible(true);
+        jButton1.setVisible(false);
+        jButton2.setVisible(true);
+        jDialog1.setTitle(title); 
+        jDialog1.setLocationRelativeTo(null);
+        jLabel2.setText(error);
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -164,7 +174,12 @@ public class Editor extends javax.swing.JFrame {
 
         jMenu4.setText("Simulation");
 
-        jMenuItem5.setText("jMenuItem5");
+        jMenuItem5.setText("Simulate");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
         jMenu4.add(jMenuItem5);
 
         jMenuBar1.add(jMenu4);
@@ -304,6 +319,10 @@ public class Editor extends javax.swing.JFrame {
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         saveFile();
     }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        ass.simulate();
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
 
     private void saveFile(){
         JFileChooser fileChooser = new JFileChooser();
