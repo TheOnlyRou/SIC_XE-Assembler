@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -268,191 +269,238 @@ private void analyseInstructions()
             else if(instructions.get(i).opcode.equals("+ADD")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="18";
             }
             else if(instructions.get(i).opcode.equals("ADD")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="18";
             }
             else if(instructions.get(i).opcode.equals("+SUB")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="1C";
             }
             else if(instructions.get(i).opcode.equals("SUB")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="1C";
             }
             else if(instructions.get(i).opcode.equals("LDCH")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="50";
             }
             else if(instructions.get(i).opcode.equals("LDA")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="00";
             }
             else if(instructions.get(i).opcode.equals("LDS")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="6C";
             }
             else if(instructions.get(i).opcode.equals("LDB")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="68";
             }
             else if(instructions.get(i).opcode.equals("LDT")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="74";
             }
-            else if(instructions.get(i).opcode.equals("LDF")){
+            else if(instructions.get(i).opcode.equals("LDL")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="08";
             }
             else if(instructions.get(i).opcode.equals("LDX")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="04";
             }            
             else if(instructions.get(i).opcode.equals("STCH")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="54";
             }
             else if(instructions.get(i).opcode.equals("STA")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="0C";
             }
             else if(instructions.get(i).opcode.equals("STS")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="7C";
             }
             else if(instructions.get(i).opcode.equals("STB")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="78";
             }
             else if(instructions.get(i).opcode.equals("STT")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="84";
             }
-            else if(instructions.get(i).opcode.equals("STF")){
+            else if(instructions.get(i).opcode.equals("STL")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="14";
             }
             else if(instructions.get(i).opcode.equals("COMP")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="28";
             }
             else if(instructions.get(i).opcode.equals("TIX")){                
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="2C";
             }
             else if(instructions.get(i).opcode.equals("+LDCH")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="50";
             }
             else if(instructions.get(i).opcode.equals("+LDA")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="00";
             }
             else if(instructions.get(i).opcode.equals("+LDS")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="6C";
             }
             else if(instructions.get(i).opcode.equals("+LDB")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="68";
             }
             else if(instructions.get(i).opcode.equals("+LDT")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="74";
             }
-            else if(instructions.get(i).opcode.equals("+LDF")){
+            else if(instructions.get(i).opcode.equals("+LDL")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="08";
             }
             else if(instructions.get(i).opcode.equals("+LDX")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="04";
             }              
             else if(instructions.get(i).opcode.equals("+STCH")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="54";
             }
             else if(instructions.get(i).opcode.equals("+STA")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="0C";
             }
             else if(instructions.get(i).opcode.equals("+STS")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="7C";
             }
             else if(instructions.get(i).opcode.equals("+STB")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="78";
             }
             else if(instructions.get(i).opcode.equals("+STT")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="84";
             }
-            else if(instructions.get(i).opcode.equals("+STF")){
+            else if(instructions.get(i).opcode.equals("+STL")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="14";
             }
             else if(instructions.get(i).opcode.equals("+COMP")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="28";
             }
             else if(instructions.get(i).opcode.equals("+TIX")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="2C";
             }
             else if(instructions.get(i).opcode.equals("JEQ")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="30";
             }
             else if(instructions.get(i).opcode.equals("+JEQ")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="30";
             }
             else if(instructions.get(i).opcode.equals("+J")){
                 instructions.get(i).address=PC;
                 incrementPC(4);
+                instructions.get(i).object="3C";
             }
             else if(instructions.get(i).opcode.equals("J")){
                 instructions.get(i).address=PC;
                 incrementPC(3);
+                instructions.get(i).object="3C";
             }
             else if(instructions.get(i).opcode.equals("+JLT")){
                 instructions.get(i).address=PC;
-                incrementPC(4);                
+                incrementPC(4);  
+                instructions.get(i).object="38";
             }
             else if(instructions.get(i).opcode.equals("JLT")){
                 instructions.get(i).address=PC;
-                incrementPC(3);                
+                incrementPC(3);
+                instructions.get(i).object="38";
             }
             else if(instructions.get(i).opcode.equals("+JGT")){
                 instructions.get(i).address=PC;
-                incrementPC(4);                
+                incrementPC(4); 
+                instructions.get(i).object="34";
             }
             else if(instructions.get(i).opcode.equals("JGT")){
                 instructions.get(i).address=PC;
-                incrementPC(3);                
+                incrementPC(3); 
+                instructions.get(i).object="34";
             }
             else if(instructions.get(i).opcode.equals("RMO")){
                 instructions.get(i).address=PC;
                 incrementPC(2);
+                instructions.get(i).object="AC";
             }
             else if(instructions.get(i).opcode.equals("SUBR")){
                 instructions.get(i).address=PC;
                 incrementPC(2);
+                instructions.get(i).object="94";
             }
             else if(instructions.get(i).opcode.equals("ADDR")){
                 instructions.get(i).address=PC;
                 incrementPC(2);
+                instructions.get(i).object="90";
             }
             else if(instructions.get(i).opcode.equals("COMR")){                
                 instructions.get(i).address=PC;
                 incrementPC(2);
+                instructions.get(i).object="A0";
             }
             else if(instructions.get(i).opcode.equals("TIXR")){
                 
                 instructions.get(i).address=PC;
                 incrementPC(2);
+                instructions.get(i).object="B8";
             }
             else if(instructions.get(i).opcode.equals("EQU")){
                 //address calculation here
@@ -646,7 +694,8 @@ private void analyseInstructions()
         }
         if(ASSEMBLED && !ERROR)
         {
-            generateNIXBPE();
+            int result = generateNIXBPE();
+            generateOpcode(result);
         }
         else
         {
@@ -657,10 +706,14 @@ private void analyseInstructions()
         }   
     }
     
-    private void generateNIXBPE()
+    private int generateNIXBPE()
     {
         for(Instruction instruction: instructions)
         {
+            if(instruction.opcode.startsWith("+"))
+            {
+                instruction.e = true;
+            }        
             if(instruction.operand1.startsWith("@"))
             {
                 instruction.n = true;
@@ -712,11 +765,13 @@ private void analyseInstructions()
                 {
                     instruction.p = true;
                     instruction.b = false;
+                    return result;
                 }
                 else if(result<=4095)
                 {
                     instruction.p = false;
                     instruction.b = true;
+                    return result;
                 }
                 else
                     System.out.println("DISPLACEMENT OUT OF BOUNDS");               
@@ -726,13 +781,11 @@ private void analyseInstructions()
                 int result = Integer.parseInt(test);  
                 instruction.b = false;
                 instruction.p = false;
+                return result;
             }
             
-            if(instruction.opcode.startsWith("+"))
-            {
-                instruction.e = true;
-            }            
-        }
+            
+        }return 0;
     }
     
     private String findAddress(String name)
@@ -758,6 +811,45 @@ private void analyseInstructions()
         }
         return null;
     }
+    private String generateOpcode(int disp){
+         for(int i=0; i<instructions.size();i++){
+             if(instructions.get(i).opcode.equals("ADDR")||instructions.get(i).opcode.equals("SUBR")||instructions.get(i).opcode.equals("COMR")){
+                 char[] objectcode = new char[16] ;
+                 int j=0;// From 0 to 15 to fill objectcode
+                 char[] r1;
+                 String hex = hexToBinary(instructions.get(i).object);
+                 char[] part1=hex.toCharArray();
+                 for (j=0;j<8;j++){
+                     objectcode[j]=part1[j];
+                 }
+                 switch(instructions.get(i).operand1){
+                     case "A":
+                         r1={0,0,0,0};
+                         break;
+                     case "B":
+                         r1={0,0,1,1};
+                         break;
+                     case "S":
+                         
+                 }
+             }
+         }
+    }
+    public static String hexToBinary(String hex) {
+    int len = hex.length() * 4;
+    String bin = new BigInteger(hex, 16).toString(2);
+
+    //left pad the string result with 0s if converting to BigInteger removes them.
+    if(bin.length() < len){
+        int diff = len - bin.length();
+        String pad = "";
+        for(int i = 0; i < diff; ++i){
+            pad = pad.concat("0");
+        }
+        bin = pad.concat(bin);
+    }
+    return bin;
+}
     
     public void newFile()
     {

@@ -71,4 +71,7 @@ public class Instruction {
         this.operand1 = op1;
         this.operand2 = op2;
     }
+    public Instruction(String object){
+        this.object=object;
+    }
 }
