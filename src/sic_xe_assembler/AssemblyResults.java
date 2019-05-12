@@ -5,8 +5,6 @@
  */
 package sic_xe_assembler;
 
-import java.awt.event.KeyEvent;
-import static java.awt.event.KeyEvent.VK_ENTER;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
