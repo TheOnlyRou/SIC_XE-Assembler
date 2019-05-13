@@ -902,6 +902,8 @@ private void analyseInstructions()
                      opcode2=opcode2+'1';
                  else
                      opcode2=opcode2+'0';
+                 String di = Integer.toHexString(i);
+                 String hexa = Integer.toHexString(0x1000 | disp).substring(1);
                  
              }
                  
