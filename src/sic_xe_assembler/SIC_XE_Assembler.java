@@ -694,8 +694,8 @@ private void analyseInstructions()
         }
         if(ASSEMBLED && !ERROR)
         {
-            int result = generateNIXBPE();
-            generateOpcode(result);
+            generateNIXBPE();
+            
         }
         else
         {
@@ -706,7 +706,7 @@ private void analyseInstructions()
         }   
     }
     
-    private int generateNIXBPE()
+    private void generateNIXBPE()
     {
         for(Instruction instruction: instructions)
         {
@@ -765,13 +765,13 @@ private void analyseInstructions()
                 {
                     instruction.p = true;
                     instruction.b = false;
-                    return result;
+                    generateOpcode(result);
                 }
                 else if(result<=4095)
                 {
                     instruction.p = false;
                     instruction.b = true;
-                    return result;
+                    generateOpcode(result);
                 }
                 else
                     System.out.println("DISPLACEMENT OUT OF BOUNDS");               
@@ -781,11 +781,11 @@ private void analyseInstructions()
                 int result = Integer.parseInt(test);  
                 instruction.b = false;
                 instruction.p = false;
-                return result;
+                generateOpcode(result);
             }
             
             
-        }return 0;
+        }
     }
     
     private String findAddress(String name)
@@ -813,26 +813,98 @@ private void analyseInstructions()
     }
     private String generateOpcode(int disp){
          for(int i=0; i<instructions.size();i++){
-             if(instructions.get(i).opcode.equals("ADDR")||instructions.get(i).opcode.equals("SUBR")||instructions.get(i).opcode.equals("COMR")){
-                 char[] objectcode = new char[16] ;
-                 int j=0;// From 0 to 15 to fill objectcode
-                 char[] r1;
-                 String hex = hexToBinary(instructions.get(i).object);
-                 char[] part1=hex.toCharArray();
-                 for (j=0;j<8;j++){
-                     objectcode[j]=part1[j];
-                 }
-                 switch(instructions.get(i).operand1){
+             if(instructions.get(i).opcode.equals("ADDR")||instructions.get(i).opcode.equals("SUBR")||instructions.get(i).opcode.equals("COMR")||instructions.get(i).opcode.equals("RMO"))
+             {
+                 int j=0;
+                 String opcode1 = instructions.get(i).object;
+                 char r1=' ',r2=' ';
+                switch(instructions.get(i).operand1){
                      case "A":
-                         r1={0,0,0,0};
+                         r1='0';
                          break;
                      case "B":
-                         r1={0,0,1,1};
+                         r1='3';
                          break;
                      case "S":
-                         
+                         r1='4';
+                         break;
+                     case "T":
+                         r1='5';
+                         break;
+                      case "L":
+                         r1='2';
+                         break;
+                      case "X":
+                         r1='1';
+                          break;
+                          
                  }
+                 switch(instructions.get(i).operand2){
+                     case "A":
+                         r2='0';
+                         break;
+                     case "B":
+                         r2='3';
+                         break;
+                     case "S":
+                         r2='4';
+                         break;
+                     case "T":
+                         r2='5';
+                         break;
+                      case "L":
+                         r2='2';
+                         break;
+                      case "X":
+                         r2='1';
+                         break;
+                          
+                 }
+                 
+                 String fin = opcode1+r1;
+                 fin=fin+r2;
+                 return fin;
              }
+             else if(instructions.get(i).opcode.startsWith("+")){
+                 
+             }
+             else{
+                 String opcode1=instructions.get(i).object;
+                 String bin = hexToBinary(opcode1);
+                 char[] bin1 = bin.toCharArray();
+                 char[] bin2 = new char[6];
+                 for(int j=0;j<6;j++){
+                     bin2[j]=bin1[j];
+                 }
+                 String opcode2=Arrays.toString(bin2);
+                 if(instructions.get(i).n){
+                     opcode2=opcode2+'1';
+                 }
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).i)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).x)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).b)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).p)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).e)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 
+             }
+                 
          }
     }
     public static String hexToBinary(String hex) {
@@ -850,6 +922,11 @@ private void analyseInstructions()
     }
     return bin;
 }
+    public static String binToHex(String bin){
+        int decimal = Integer.parseInt(bin,2);
+        String hexStr = Integer.toString(decimal,16);
+        return hexStr;
+    }
     
     public void newFile()
     {
