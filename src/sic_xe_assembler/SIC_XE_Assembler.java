@@ -820,10 +820,6 @@ private void analyseInstructions()
             {          
                 
             }
-            else if(!inst.operand2.equals(""))
-            {
-                
-            }
             else{
                 
             }
