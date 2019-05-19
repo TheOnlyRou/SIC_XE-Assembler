@@ -646,7 +646,15 @@ private void analyseInstructions()
         }
         if(ASSEMBLED && !ERROR)
         {
-            generateNIXBPE();
+            for(Instruction instruction: instructions)
+            {
+                if(instruction.comment.equals(""))
+                {
+                    String opcode = generateOpcode(instruction);
+                    String NIXBPE = generateNIXBPE(instruction);
+                    String operand = generateOperand(instruction);
+                }
+            }
         }
         else
         {
@@ -657,82 +665,86 @@ private void analyseInstructions()
         }   
     }
     
-    private void generateNIXBPE()
+    private String generateOpcode(Instruction inst)
     {
-        for(Instruction instruction: instructions)
+        String temp;
+        if(inst.opcode.startsWith("+"))
+            temp = inst.opcode.substring(1);
+        else
+            temp = inst.opcode;
+        for(int i=0; i<ObjectCode.opcodes.length;i++)
         {
-            if(instruction.operand1.startsWith("@"))
+            if(temp.equals(ObjectCode.opcodes[i][0]))
             {
-                instruction.n = true;
-                instruction.i = false;
-                instruction.x = false;
+                return ObjectCode.opcodes[i][0];
             }
-            else if(instruction.operand1.startsWith("#"))
-            {                
-                instruction.n = false;
-                instruction.i = true;
-                instruction.x = false;
-            }
-            else if(!instruction.operand2.equals(""))
-            {
-                instruction.n = true;
-                instruction.i = true;
-                instruction.x = true;
-            }
-            else{
-                instruction.n = true;
-                instruction.i = true;
-                instruction.x = false;
-            }
+        }
+        return "00";
+    }
+    
+    private String generateNIXBPE(Instruction inst)
+    {
+        String NIXBPE;
+        if(inst.operand1.startsWith("@"))
+        {
+            NIXBPE = "100";
+        }
+        else if(inst.operand1.startsWith("#"))
+        {          
+            NIXBPE = "101";
+        }
+        else if(!inst.operand2.equals(""))
+        {
+            NIXBPE = "111";
+        }
+        else{
+            NIXBPE = "110";
+        }
+        
+        String test = inst.operand1;
+        if(test.startsWith("#") || test.startsWith("@"))
+        {
+           test = inst.operand1.substring(1);
+        }
             
-            char[] testLabel = instruction.operand1.toCharArray();
-            if(testLabel[0]=='#' || testLabel[0]=='@')
+        boolean LABEL = false;
+        char[] testarr = test.toCharArray();
+        for(int j = 0; j<testarr.length;j++)
+        {
+            if(!Character.isDigit(testarr[j]))
             {
-                testLabel[0]=' ';                
+                LABEL = true; 
             }
-            String test = Arrays.toString(testLabel);
-            test = test.trim();
-            boolean LABEL = false;
-            char[] testarr = test.toCharArray();
-            for(int j = 0; j<testarr.length;j++)
+        }
+        String address;
+        String nextAddress;
+        if(LABEL)
+        {
+            address = findAddress(test);
+            nextAddress = findNextAddress(inst.address);                
+            int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
+            if(result >= -2048 && result <=2047)
             {
-                if(!Character.isDigit(testarr[j]))
-                {
-                   LABEL = true; 
-                }
+                NIXBPE = NIXBPE + "10";
             }
-            String address;
-            String nextAddress;
-            if(LABEL)
+            else if(result<=4095)
             {
-                address = findAddress(test);
-                nextAddress = findNextAddress(instruction.address);                
-                int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
-                if(result >= -2048 && result <=2047)
-                {
-                    instruction.p = true;
-                    instruction.b = false;
-                }
-                else if(result<=4095)
-                {
-                    instruction.p = false;
-                    instruction.b = true;
-                }
-                else
-                    System.out.println("DISPLACEMENT OUT OF BOUNDS");               
+                NIXBPE = NIXBPE + "01";
             }
             else
-            {
-                int result = Integer.parseInt(test);  
-                instruction.b = false;
-                instruction.p = false;
+                System.out.println("DISPLACEMENT OUT OF BOUNDS");               
             }
-            
-            if(instruction.opcode.startsWith("+"))
-            {
-                instruction.e = true;
-            }            
+        else
+        {
+            int result = Integer.parseInt(test);  
+            NIXBPE = NIXBPE + "00";
         }
+            
+        if(inst.opcode.startsWith("+"))
+        {
+            NIXBPE = NIXBPE + "1";
+        }            
+        
     }
     
     private String findAddress(String name)

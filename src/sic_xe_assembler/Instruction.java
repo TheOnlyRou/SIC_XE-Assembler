@@ -15,13 +15,6 @@ public class Instruction {
     String Error = "";
     String object = "";
     
-    boolean n = false;
-    boolean i = false;
-    boolean x = false;
-    boolean b = false;
-    boolean p = false;
-    boolean e = false;
-    
     private String[] arr2 = {"RMO", "SUBR", "TIXR", "COMR", "ADDR"};
     private String[] arr3 = {"LDA", "LDX", "LDS", "LDT", "LDF", "STA", "STX", "STS", "STT", "STF", 
                              "LDCH", "STCH", "ADD", "SUB", "COMP", "J", "JEQ", "JLT", 
