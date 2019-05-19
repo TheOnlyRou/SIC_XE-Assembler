@@ -743,9 +743,16 @@ private void analyseInstructions()
         if(inst.opcode.startsWith("+"))
         {
             NIXBPE = NIXBPE + "1";
-        }            
-        
+        }
+        else
+            NIXBPE = NIXBPE + "0";
+        return NIXBPE;
     }
+    
+    private String generateOpCode(Instruction inst)
+    {
+        
+    }   
     
     private String findAddress(String name)
     {
