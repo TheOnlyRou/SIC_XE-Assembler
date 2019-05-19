@@ -13,18 +13,19 @@ public class Instruction {
     String label = "";
     String comment = "";
     String Error = "";
+    String object = "";
     
-    private String[] arr2 = {"RMO", "SUBR", "TIXR", "COMR"};
-    private String[] arr3 = {"LDA", "LDX", "LDS", "LDT", "LDF", "STA", "STX", "STS", "STT", "STF", 
-                             "LDCH", "STCH", "ADD", "SUB", "ADDR", "COMP", "J", "JEQ", "JLT", 
+    private static String[] arr2 = {"RMO", "SUBR", "TIXR", "COMR", "ADDR"};
+    private static String[] arr3 = {"LDA", "LDX", "LDS", "LDT", "LDF", "STA", "STX", "STS", "STT", "STF", 
+                             "LDCH", "STCH", "ADD", "SUB", "COMP", "J", "JEQ", "JLT", 
                              "JGT", "TIX", "TIXR"};
-    private String[] arr4 = {"+LDA", "+LDX", "+LDS", "+LDT", "+LDF", "+STA", "+STX", "+STS", "+STT", "+STF", 
-                             "+LDCH", "+STCH", "+ADD", "+SUB", "+ADDR", "+COMP", "+J", "+JEQ", "+JLT", 
+    private static String[] arr4 = {"+LDA", "+LDX", "+LDS", "+LDT", "+LDF", "+STA", "+STX", "+STS", "+STT", "+STF", 
+                             "+LDCH", "+STCH", "+ADD", "+SUB", "+COMP", "+J", "+JEQ", "+JLT", 
                              "+JGT", "+TIX", "+TIXR"};
     
-    Set<String> format2 = new HashSet<>(Arrays.asList(arr2));
-    Set<String> format3 = new HashSet<>(Arrays.asList(arr3));
-    Set<String> format4 = new HashSet<>(Arrays.asList(arr4));
+    static Set<String> format2 = new HashSet<>(Arrays.asList(arr2));
+    static Set<String> format3 = new HashSet<>(Arrays.asList(arr3));
+    static Set<String> format4 = new HashSet<>(Arrays.asList(arr4));
     
     public Instruction(String comment,boolean type)
     {

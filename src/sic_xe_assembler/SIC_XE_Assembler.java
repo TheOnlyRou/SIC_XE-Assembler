@@ -94,7 +94,7 @@ public class SIC_XE_Assembler {
     
     private void stringToInstruction(String text)
     {
-        String[] result = text.split("\\s");
+        String[] result = text.split("\\s+");
         if(result[0].startsWith("."))
         {
             instructions.add(new Instruction(text,true));
@@ -119,6 +119,19 @@ public class SIC_XE_Assembler {
                     break;
             }
         }
+    }
+    
+    public boolean isNumeric(String test)
+    {            
+        char[] testarr = test.toCharArray();
+        for(int j = 0; j<testarr.length;j++)
+        {
+            if(!Character.isDigit(testarr[j]))
+            {
+                return false; 
+            }
+        }    
+        return true;
     }
     
     private void testInstructions()
@@ -155,13 +168,18 @@ public class SIC_XE_Assembler {
                         instructions.get(i).Error = "ERROR: ADDRESS IS NOT HEXADECIMAL";
                     }
                 }
-                instructions.get(i).address = instructions.get(i).operand1;
+                if(instructions.get(i).Error.equals(""))
+                    instructions.get(i).address = instructions.get(i).operand1;
+                else
+                    instructions.get(i).address = "1000";
             }
             else if(instructions.get(i).comment.equals("") && !START)
             {
                 instructions.get(i).Error = "ERROR: MISSING START STATEMENT";
+                instructions.get(i).address = "1000";
+                START = true;
             }
-             else if(instructions.get(i).opcode.startsWith("#") || instructions.get(i).opcode.startsWith("%") ||
+            else if(instructions.get(i).opcode.startsWith("#") || instructions.get(i).opcode.startsWith("%") ||
                     instructions.get(i).opcode.startsWith("*") || instructions.get(i).opcode.startsWith("$")
                     || instructions.get(i).opcode.startsWith("@"))
             {
@@ -179,9 +197,9 @@ public class SIC_XE_Assembler {
             {
                 instructions.get(i).Error = "ERROR: INSTRUCTION CAN'T BE FORMAT 4";
             }
-            else if(!instructions.get(i).opcode.equals("") && !instructions.get(i).format2.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format3.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode) && !instructions.get(i).opcode.equals("END"))
+            else if(!instructions.get(i).opcode.equals("") && !Instruction.format2.contains(instructions.get(i).opcode) &&
+                    !Instruction.format3.contains(instructions.get(i).opcode) &&
+                    !Instruction.format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode) && !instructions.get(i).opcode.equals("END"))
             {
                 instructions.get(i).Error = "ERROR: UNRECOGNIZED OPERATION CODE";
             }
@@ -202,22 +220,30 @@ public class SIC_XE_Assembler {
             {
                 instructions.get(i).Error = "ERROR: WRONG OPERAND PREFIX";
             } 
-           
-             if(instructions.get(i).format2.contains(instructions.get(i).opcode) || instructions.get(i).opcode.equals("ADDR")){
-                 if (!registers.contains(instructions.get(i).operand1)){
-                     instructions.get(i).Error = "ERROR: OPERAND 1 IS NOT A REGISTER";
-                 }
-                 if (!registers.contains(instructions.get(i).operand2) && !instructions.get(i).operand2.equals("")){
-                     instructions.get(i).Error = "ERROR: OPERAND 2 IS NOT A REGISTER";
-                 }
-             }
-             if (instructions.get(i).opcode.equals("ADDR") || instructions.get(i).opcode.equals("SUBR") || instructions.get(i).opcode.equals("RMO") || instructions.get(i).opcode.equals("COMR")){
-              
+            else if((instructions.get(i).format3.contains(instructions.get(i).opcode) || instructions.get(i).format4.contains(instructions.get(i).opcode)))
+            {
+                if(!instructions.get(i).operand2.equals(""))
+                {
+                    instructions.get(i).Error = "ERROR: THIS OPERATION ACCEPTS ONLY 1 OPERAND";
+                }
+            }           
+            else if(Instruction.format2.contains(instructions.get(i).opcode)){
+                if (!registers.contains(instructions.get(i).operand1))
+                {
+                    instructions.get(i).Error = "ERROR: OPERAND 1 IS NOT A REGISTER";
+                }
+                if (!registers.contains(instructions.get(i).operand2) && !instructions.get(i).operand2.equals("") && !instructions.get(i).opcode.equals("TIXR"))
+                {
+                    instructions.get(i).Error = "ERROR: OPERAND 2 IS NOT A REGISTER";
+                }
+            }
+            else if (instructions.get(i).opcode.equals("ADDR") || instructions.get(i).opcode.equals("SUBR") || instructions.get(i).opcode.equals("RMO") || instructions.get(i).opcode.equals("COMR"))
+            {
                  if(instructions.get(i).operand2.equals("")){
                      
                     instructions.get(i).Error = "ERROR: OPERAND 2 MISSING";
                  }
-                     }
+            }
         }
         if(!instructions.get(instructions.size()-1).opcode.equals("END"))
         {
@@ -227,6 +253,17 @@ public class SIC_XE_Assembler {
     
 private void analyseInstructions()
     {
+        boolean addfound=false;
+        int count = 0;
+        while(!addfound && count<instructions.size())
+        {
+            if(!instructions.get(count).address.equals(""))
+            {
+                PC = instructions.get(count).address;
+                addfound = true;
+            }
+            count++;
+        }        
         for(int i = 0; i < instructions.size();i++)
         {
             if(instructions.get(i).opcode.equals("START"))
@@ -540,9 +577,19 @@ private void analyseInstructions()
                 if(!instructions.get(i).label.equals("")){
                     instructions.get(i).Error="ERROR: LABEL SHOULDN'T BE PRESENT";
                 }
-                instructions.get(i).address = instructions.get(i).operand1;  
+                instructions.get(i).address =  instructions.get(i).operand1;  
             }
-                    
+            if(!instructions.get(i).label.equals(""))
+            {
+                boolean newsymbol=true;
+                for(int j = 0; j<symbols.size();j++)
+                {
+                    if(symbols.get(j).name.equals(instructions.get(i).label))
+                    newsymbol = false;
+                }
+                if(newsymbol)
+                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).address));
+            }
         }
     }
     
@@ -603,9 +650,240 @@ private void analyseInstructions()
         }
     }   
     
+    public void simulate()
+    {
+        boolean ERROR=false;
+        for (Instruction instruction : instructions) {
+            if(!instruction.Error.equals(""))
+                ERROR=true;
+        }
+        if(ASSEMBLED && !ERROR)
+        {
+            for(Instruction instruction: instructions)
+            {
+                if(instruction.comment.equals(""))
+                {
+                    String opcode = generateOpcode(instruction);
+                    String NIXBPE = generateNIXBPE(instruction);
+                    String operand = generateOperand(instruction);
+                }
+            }
+        }
+        else
+        {
+            if(ERROR)
+                this.editor.displayError("Assembly incomplete", "Please fix the code errors and try again");                
+            else if(!ASSEMBLED)
+                this.editor.displayError("Assembly incomplete", "Please assemble a file and try again");
+        }   
+    }
+    
+    private String generateOpcode(Instruction inst)
+    {
+        String temp;
+        if(inst.opcode.startsWith("+"))
+            temp = inst.opcode.substring(1);
+        else
+            temp = inst.opcode;
+        for(int i=0; i<ObjectCode.opcodes.length;i++)
+        {
+            if(temp.equals(ObjectCode.opcodes[i][0]))
+            {
+                return ObjectCode.opcodes[i][0];
+            }
+        }
+        return "00";
+    }
+    
+    private String generateNIXBPE(Instruction inst)
+    {
+        String NIXBPE;
+        if(inst.operand1.startsWith("@"))
+        {
+            NIXBPE = "100";
+        }
+        else if(inst.operand1.startsWith("#"))
+        {          
+            NIXBPE = "101";
+        }
+        else if(!inst.operand2.equals(""))
+        {
+            NIXBPE = "111";
+        }
+        else{
+            NIXBPE = "110";
+        }
+        
+        String test = inst.operand1;
+        if(test.startsWith("#") || test.startsWith("@"))
+        {
+           test = inst.operand1.substring(1);
+        }
+            
+        boolean LABEL = false;
+        char[] testarr = test.toCharArray();
+        for(int j = 0; j<testarr.length;j++)
+        {
+            if(!Character.isDigit(testarr[j]))
+            {
+                LABEL = true; 
+            }
+        }
+        String address;
+        String nextAddress;
+        if(LABEL)
+        {
+            address = findAddress(test);
+            nextAddress = findNextAddress(inst.address);                
+            int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
+            if(result >= -2048 && result <=2047)
+            {
+                NIXBPE = NIXBPE + "10";
+            }
+            else if(result<=4095)
+            {
+                NIXBPE = NIXBPE + "01";
+            }
+            else
+                System.out.println("DISPLACEMENT OUT OF BOUNDS");               
+            }
+        else
+        {
+            int result = Integer.parseInt(test);  
+            NIXBPE = NIXBPE + "00";
+        }
+            
+        if(inst.opcode.startsWith("+"))
+        {
+            NIXBPE = NIXBPE + "1";
+        }
+        else
+            NIXBPE = NIXBPE + "0";
+        return NIXBPE;
+    }
+    
+    private String generateOperand(Instruction inst)
+    {
+        //Format 2
+        if(Instruction.format2.contains(inst.opcode)&& !inst.opcode.equals("TIXR"))
+        {
+            String r1="",r2="";
+            switch(inst.operand1){
+                case "A":
+                    r1="0";
+                    break;
+                case "B":
+                    r1="3";
+                    break;
+                case "S":
+                    r1="4";
+                    break;
+                case "T":
+                    r1="5";
+                    break;
+                case "L":
+                    r1="2";
+                    break;
+                case "X":
+                    r1="1";
+                    break;                          
+                }
+                switch(inst.operand2){
+                case "A":
+                    r2="0";
+                    break;
+                case "B":
+                    r2="3";
+                    break;
+                case "S":
+                    r2="4";
+                    break;
+                case "T":
+                    r2="5";
+                    break;
+                case "L":
+                    r2="2";
+                    break;
+                case "X":
+                    r2="1";
+                    break;                       
+                }
+            return r1+r2;
+        }
+        //Format 4
+        else if(inst.opcode.startsWith("+")){
+            if(inst.operand1.startsWith("@"))
+            {
+                
+            }
+            else if(inst.operand1.startsWith("#"))
+            {          
+                
+            }
+            else{
+                
+            }
+        }
+        //format 3
+        else{            
+            String test = inst.operand1;
+            if(test.startsWith("#") || test.startsWith("@"))
+            {   
+                test = inst.operand1.substring(1);
+            }
+            
+            boolean LABEL = false;
+            char[] testarr = test.toCharArray();
+            for(int j = 0; j<testarr.length;j++)
+            {   
+                if(!Character.isDigit(testarr[j]))
+                {
+                    LABEL = true; 
+                }
+            }
+            String address;
+            String nextAddress;
+            if(LABEL)
+            {
+                address = findAddress(test);
+                nextAddress = findNextAddress(inst.address);                
+                int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
+                return Integer.toHexString(result);
+            }
+                int result = Integer.parseInt(test);
+                return Integer.toHexString(result);
+            }
+        return null;
+    }
+    
+    private String findAddress(String name)
+    {
+        for(Symbol sym:symbols)
+        {
+            if(sym.name.equals(name))
+            {
+                return sym.address;
+            }
+        }
+        return null;
+    }
+    
+    private String findNextAddress(String address)
+    {
+        for(int i=0; i<instructions.size();i++)
+        {
+            if(instructions.get(i).address.equals(address))
+            {
+                return instructions.get(i+1).address;
+            }
+        }
+        return null;
+    }
+    
     public void newFile()
     {
         this.f = null;
+        this.ASSEMBLED = false;
         this.START = false;
         this.instructions = new ArrayList<Instruction>();
         this.symbols = new ArrayList<Symbol>();
