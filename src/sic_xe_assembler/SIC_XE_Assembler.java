@@ -37,6 +37,7 @@ public class SIC_XE_Assembler {
     Set<Character> hex = new HashSet<Character>();
     Set<String> registers = new HashSet<String>();
     String programName ="";
+    String text ="";
 
     
     public static void main(String[] args) 
