@@ -121,6 +121,19 @@ public class SIC_XE_Assembler {
         }
     }
     
+    public boolean isNumeric(String test)
+    {            
+        char[] testarr = test.toCharArray();
+        for(int j = 0; j<testarr.length;j++)
+        {
+            if(!Character.isDigit(testarr[j]))
+            {
+                return false; 
+            }
+        }    
+        return true;
+    }
+    
     private void testInstructions()
     {
         for(int i=0; i<instructions.size(); i++)
@@ -184,9 +197,9 @@ public class SIC_XE_Assembler {
             {
                 instructions.get(i).Error = "ERROR: INSTRUCTION CAN'T BE FORMAT 4";
             }
-            else if(!instructions.get(i).opcode.equals("") && !instructions.get(i).format2.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format3.contains(instructions.get(i).opcode) &&
-                    !instructions.get(i).format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode) && !instructions.get(i).opcode.equals("END"))
+            else if(!instructions.get(i).opcode.equals("") && !Instruction.format2.contains(instructions.get(i).opcode) &&
+                    !Instruction.format3.contains(instructions.get(i).opcode) &&
+                    !Instruction.format4.contains(instructions.get(i).opcode) && !dir.directives.contains(instructions.get(i).opcode) && !instructions.get(i).opcode.equals("END"))
             {
                 instructions.get(i).Error = "ERROR: UNRECOGNIZED OPERATION CODE";
             }
@@ -214,7 +227,7 @@ public class SIC_XE_Assembler {
                     instructions.get(i).Error = "ERROR: THIS OPERATION ACCEPTS ONLY 1 OPERAND";
                 }
             }           
-            else if(instructions.get(i).format2.contains(instructions.get(i).opcode)){
+            else if(Instruction.format2.contains(instructions.get(i).opcode)){
                 if (!registers.contains(instructions.get(i).operand1))
                 {
                     instructions.get(i).Error = "ERROR: OPERAND 1 IS NOT A REGISTER";
@@ -749,10 +762,103 @@ private void analyseInstructions()
         return NIXBPE;
     }
     
-    private String generateOpCode(Instruction inst)
+    private String generateOperand(Instruction inst)
     {
-        
-    }   
+        //Format 2
+        if(Instruction.format2.contains(inst.opcode)&& !inst.opcode.equals("TIXR"))
+        {
+            String r1="",r2="";
+            switch(inst.operand1){
+                case "A":
+                    r1="0";
+                    break;
+                case "B":
+                    r1="3";
+                    break;
+                case "S":
+                    r1="4";
+                    break;
+                case "T":
+                    r1="5";
+                    break;
+                case "L":
+                    r1="2";
+                    break;
+                case "X":
+                    r1="1";
+                    break;                          
+                }
+                switch(inst.operand2){
+                case "A":
+                    r2="0";
+                    break;
+                case "B":
+                    r2="3";
+                    break;
+                case "S":
+                    r2="4";
+                    break;
+                case "T":
+                    r2="5";
+                    break;
+                case "L":
+                    r2="2";
+                    break;
+                case "X":
+                    r2="1";
+                    break;                       
+                }
+            return r1+r2;
+        }
+        //Format 4
+        else if(inst.opcode.startsWith("+")){
+            if(inst.operand1.startsWith("@"))
+            {
+                
+            }
+            else if(inst.operand1.startsWith("#"))
+            {          
+                
+            }
+            else if(!inst.operand2.equals(""))
+            {
+                
+            }
+            else{
+                
+            }
+        }
+        //format 3
+        else{            
+            String test = inst.operand1;
+            if(test.startsWith("#") || test.startsWith("@"))
+            {   
+                test = inst.operand1.substring(1);
+            }
+            
+            boolean LABEL = false;
+            char[] testarr = test.toCharArray();
+            for(int j = 0; j<testarr.length;j++)
+            {   
+                if(!Character.isDigit(testarr[j]))
+                {
+                    LABEL = true; 
+                }
+            }
+            String address;
+            String nextAddress;
+            if(LABEL)
+            {
+                address = findAddress(test);
+                nextAddress = findNextAddress(inst.address);                
+                int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
+                return Integer.toHexString(result);
+            }
+                int result = Integer.parseInt(test);
+                return Integer.toHexString(result);
+            }
+        return null;
+    }
     
     private String findAddress(String name)
     {
