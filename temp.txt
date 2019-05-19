@@ -1,15 +1,15 @@
-.  if y>=6 then e = 5y else e = y+10
+ .  if y>=6 then e = 5y else e = y+10
 .
 prog start 1000
 bgn LDA Y
-COMP #6
+#COMP #6
 JGT ELSE
 LDA #5
 MUL Y
 STA E
 J OUT
 ELSE LDA Y
-ADDR #10 , S
+SUBR #10 , S
 STA E   
 OUT j OUT
 .

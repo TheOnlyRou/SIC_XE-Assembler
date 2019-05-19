@@ -1,5 +1,6 @@
 package sic_xe_assembler;
 
+import static java.awt.SystemColor.text;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,6 +20,7 @@ public class SIC_XE_Assembler {
     Directive dir = new Directive();
     ArrayList<Instruction> instructions = new ArrayList<Instruction>();
     ArrayList<Symbol> symbols = new ArrayList<Symbol>();
+    static ArrayList objectCode = new ArrayList();
     private String PC;
     private String startAddress;
     private int[] memory = new int[1024];
@@ -34,6 +36,7 @@ public class SIC_XE_Assembler {
     public boolean ASSEMBLED = false;
     Set<Character> hex = new HashSet<Character>();
     Set<String> registers = new HashSet<String>();
+    String programName ="";
 
     
     public static void main(String[] args) 
@@ -61,7 +64,108 @@ public class SIC_XE_Assembler {
         ass.registers.add("X");
         ass.registers.add("F");
         ass.editor.run();
+        String text ="";
+        System.out.println(text);
+               
     }
+         public String writetext(){
+      
+      String first = instructions.get(0).address;    
+      String last = (String) instructions.get(instructions.size()-1).address;
+      int diff  = (Integer.parseInt(first,16)) -(Integer.parseInt(last,16));
+      String length = Integer.toHexString(diff);
+      text = text+"H^"+programName+"^"+instructions.get(1).address+"^"+length+"\n";
+      // address and size to be confirmed later by if conditions,no comments allowed//
+       int i = 1;
+      
+      String Tot=instructions.get(instructions.size()-1).address;
+      int num = Integer.parseInt("" + Tot, 16);
+      
+      while(i < 12000){
+          String sidetext ="";
+          int len = 0;
+          
+            
+              
+            int c = 0; 
+              while(c<30){
+                  
+                  if((instructions.get(i).opcode.equals("RESW")) ||(instructions.get(i).opcode.equals("RESB"))){
+                    break;
+                }
+                  if(instructions.get(i).opcode.equals("END"))
+                      break;
+                  sidetext+="^"+(String) objectCode.get(i);
+             if(instructions.get(i).opcode.equals("WORD") ){
+                      c = c+3;}
+             else if(instructions.get(i).opcode.equals("BYTE")) {
+                      String temp = instructions.get(i-1).opcode;
+                      double byt1;
+                      int byt;
+                      if(temp.charAt(0) == 'C'){
+                          byt = temp.length() - 3;
+                          
+                      }
+                      else{
+                          byt1 = (temp.length() -3)/2.0;
+                          byt = (int) Math.ceil(byt1);
+                      }     
+                      c = c + byt;
+             }
+             else {
+                      String func = instructions.get(i).opcode;
+                      char[] funcarr = func.toCharArray();
+                      //format 4
+                      if(funcarr[0] == '+'){
+                          
+                          
+                          c = c+ 4;
+                          
+                      }
+                      else if(instructions.get(i).opcode.equals("ADDR") || instructions.get(i).opcode.equals("SUBR") || instructions.get(i).opcode.equals("RMO") || instructions.get(i).opcode.equals("COMR") || instructions.get(i).opcode.equals("TIXR")){
+                              c = c + 2;
+                              
+                          }
+                          else if(instructions.get(i).opcode.equals("LDA") ||instructions.get(i).opcode.equals("LDX") ||instructions.get(i).opcode.equals("LDS") ||
+                                  instructions.get(i).opcode.equals("LDT") ||instructions.get(i).opcode.equals("LDF") ||instructions.get(i).opcode.equals("STA") ||
+                                  instructions.get(i).opcode.equals("STX") ||instructions.get(i).opcode.equals("STS") ||instructions.get(i).opcode.equals("STT") ||
+                                  instructions.get(i).opcode.equals("STF") ||instructions.get(i).opcode.equals("LDCH") ||instructions.get(i).opcode.equals("STCH") ||
+                                  instructions.get(i).opcode.equals("ADD") ||instructions.get(i).opcode.equals("SUB") ||instructions.get(i).opcode.equals("COMP") ||
+                                  instructions.get(i).opcode.equals("J") ||instructions.get(i).opcode.equals("JEQ") ||instructions.get(i).opcode.equals("JLT") ||
+                                  instructions.get(i).opcode.equals("JGT") ||instructions.get(i).opcode.equals("TIX")){
+                              c = c + 3;
+                          }
+                          else{
+                              c = c + 1;
+                              
+                          }
+                          
+                      }      
+                      len = c;
+                      
+              }
+               
+            i++;  
+      
+             
+              if(c != 0){
+              text+= "T^" ; 
+              String tlength = Integer.toHexString(c);
+              
+              text+=tlength+sidetext;
+               
+              text+="\n";
+              }
+              i++;
+          }
+            text+="E^"+instructions.get(0).address;
+            return text;
+
+}
+      
+
+
+
     
     public void incrementPC(int bytes)
     {
@@ -256,6 +360,8 @@ private void analyseInstructions()
         {
             if(instructions.get(i).opcode.equals("START"))
             {
+                if(!instructions.get(i).label.equals(""))
+                    programName = instructions.get(i).label;
                 for(int j = 0; j <= i; j++)
                 {
                     instructions.get(j).address = instructions.get(i).operand1;
@@ -687,6 +793,7 @@ private void analyseInstructions()
     
     public void simulate()
     {
+        objectCode.add("");
         boolean ERROR=false;
         for (Instruction instruction : instructions) {
             if(!instruction.Error.equals(""))
@@ -703,7 +810,9 @@ private void analyseInstructions()
                 this.editor.displayError("Assembly incomplete", "Please fix the code errors and try again");                
             else if(!ASSEMBLED)
                 this.editor.displayError("Assembly incomplete", "Please assemble a file and try again");
-        }   
+        } 
+        writetext();
+        System.out.println(text);
     }
     
     private void generateNIXBPE()
@@ -813,7 +922,7 @@ private void analyseInstructions()
     }
     private String generateOpcode(int disp){
          for(int i=0; i<instructions.size();i++){
-             if(instructions.get(i).opcode.equals("ADDR")||instructions.get(i).opcode.equals("SUBR")||instructions.get(i).opcode.equals("COMR")||instructions.get(i).opcode.equals("RMO"))
+             if(instructions.get(i).opcode.equals("ADDR")||instructions.get(i).opcode.equals("SUBR")||instructions.get(i).opcode.equals("COMR")||instructions.get(i).opcode.equals("RMO")||instructions.get(i).opcode.equals("TIXR"))
              {
                  int j=0;
                  String opcode1 = instructions.get(i).object;
@@ -863,10 +972,52 @@ private void analyseInstructions()
                  
                  String fin = opcode1+r1;
                  fin=fin+r2;
-                 return fin;
-             }
+                 objectCode.add(fin) ;
+                 return fin ;
+                 }
              else if(instructions.get(i).opcode.startsWith("+")){
+                 String opcode1=instructions.get(i).object;
+                 String bin = hexToBinary(opcode1);
+                 char[] bin1 = bin.toCharArray();
+                 char[] bin2 = new char[6];
+                 for(int j=0;j<6;j++){
+                     bin2[j]=bin1[j];
+                 }
+                 String opcode2=Arrays.toString(bin2);
+                 if(instructions.get(i).n){
+                     opcode2=opcode2+'1';
+                 }
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).i)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).x)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).b)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).p)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
+                 if(instructions.get(i).e)
+                     opcode2=opcode2+'1';
+                 else
+                     opcode2=opcode2+'0';
                  
+                 String ad = (String)instructions.get(i).address ;
+                 int foo= Integer.parseInt(ad,16);
+                 String addr = Integer.toHexString(0x100000 | foo).substring(1);
+                 String adr =hexToBinary(addr);
+                 opcode2 += adr;
+                 String fin = binToHex (opcode2);
+                 objectCode.add(fin);
+               
              }
              else{
                  String opcode1=instructions.get(i).object;
@@ -902,12 +1053,17 @@ private void analyseInstructions()
                      opcode2=opcode2+'1';
                  else
                      opcode2=opcode2+'0';
-                 String di = Integer.toHexString(i);
-                 String hexa = Integer.toHexString(0x1000 | disp).substring(1);
-                 
+                 //String di = Integer.toHexString(i);//
+                 String dispo = Integer.toHexString(0x1000 | disp).substring(1);
+                 String dispa =hexToBinary(dispo);
+                 opcode2+= dispa;
+                 String fin = binToHex(opcode2);
+                 objectCode.add (fin);
              }
                  
          }
+        String fin ="";
+        return fin;
     }
     public static String hexToBinary(String hex) {
     int len = hex.length() * 4;
@@ -939,5 +1095,7 @@ private void analyseInstructions()
         this.symbols = new ArrayList<Symbol>();
         this.PC = null;
         this.startAddress = null;
+        this.programName="";
+        
     }
 }
