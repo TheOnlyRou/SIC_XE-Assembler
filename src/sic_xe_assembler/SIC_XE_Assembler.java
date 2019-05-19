@@ -812,16 +812,14 @@ private void analyseInstructions()
         }
         //Format 4
         else if(inst.opcode.startsWith("+")){
-            if(inst.operand1.startsWith("@"))
+            String test = inst.operand1.substring(1);
+            if(isNumeric(test))
             {
-                
+                return test;
             }
-            else if(inst.operand1.startsWith("#"))
-            {          
-                
-            }
-            else{
-                
+            else
+            {
+                return findAddress(test);
             }
         }
         //format 3
