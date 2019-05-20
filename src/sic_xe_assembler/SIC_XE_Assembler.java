@@ -33,7 +33,7 @@ public class SIC_XE_Assembler {
     public boolean ASSEMBLED = false;
     Set<Character> hex = new HashSet<Character>();
     Set<String> registers = new HashSet<String>();
-
+    ObjectCode objcode = new ObjectCode();
     
     public static void main(String[] args) 
     {
@@ -90,6 +90,8 @@ public class SIC_XE_Assembler {
         AssemblyResults display = new AssemblyResults(this);
         display.run();
         display.displayResults(instructions, symbols);
+        simulate();
+        
     }
     
     private void stringToInstruction(String text)
@@ -666,6 +668,21 @@ private void analyseInstructions()
                     String opcode = generateOpcode(instruction);
                     String NIXBPE = generateNIXBPE(instruction);
                     String operand = generateOperand(instruction);
+                    
+                    if(Instruction.format2.contains(instruction.opcode))
+                    {
+                        int foo = Integer.parseInt(operand);                        
+                        objcode.addObjectInstruction(opcode, Integer.toHexString(foo));
+                    }
+                    else if(Instruction.format3.contains(instruction.opcode) || Instruction.format4.contains(instruction.opcode))
+                    {
+                        int foo = Integer.parseInt(NIXBPE,2);                        
+                        objcode.addObjectInstruction(opcode,Integer.toHexString(foo),operand);
+                    }
+                    else 
+                    {
+                        objcode.addObjectInstruction(opcode);
+                    }                    
                 }
             }
         }
@@ -765,6 +782,29 @@ private void analyseInstructions()
     private String generateOperand(Instruction inst)
     {
         //Format 2
+        if(inst.opcode.equals("TIXR"))
+        {
+            String r1="";
+        
+            switch(inst.operand1){
+                case "A":
+                    r1="0";
+                    break;
+                case "B":
+                    r1="3";
+                    break;
+                case "S":
+                    r1="4";
+                    break;
+                case "T":
+                    r1="5";
+                    break;
+                case "L":
+                    r1="2";
+                    break;
+                }   
+            return r1 + "1";
+        }        
         if(Instruction.format2.contains(inst.opcode)&& !inst.opcode.equals("TIXR"))
         {
             String r1="",r2="";
@@ -824,34 +864,17 @@ private void analyseInstructions()
         }
         //format 3
         else{            
-            String test = inst.operand1;
-            if(test.startsWith("#") || test.startsWith("@"))
-            {   
-                test = inst.operand1.substring(1);
-            }
-            
-            boolean LABEL = false;
-            char[] testarr = test.toCharArray();
-            for(int j = 0; j<testarr.length;j++)
-            {   
-                if(!Character.isDigit(testarr[j]))
+                String test = inst.operand1.substring(1);
+                if(isNumeric(test))
                 {
-                    LABEL = true; 
+                    return test;
                 }
-            }
-            String address;
-            String nextAddress;
-            if(LABEL)
-            {
-                address = findAddress(test);
-                nextAddress = findNextAddress(inst.address);                
-                int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
-                return Integer.toHexString(result);
-            }
-                int result = Integer.parseInt(test);
-                return Integer.toHexString(result);
-            }
-        return null;
+                else
+                {
+                    return findAddress(test);
+            
+                }
+         }
     }
     
     private String findAddress(String name)

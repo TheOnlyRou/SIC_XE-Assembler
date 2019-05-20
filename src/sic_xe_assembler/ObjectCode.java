@@ -24,7 +24,7 @@ public class ObjectCode {
                           {"SUBR","94"} , {"TIX", "2C"} , {"TIXR","B8"}
                           };    
     
-    class ObjectInstruction{
+    public class ObjectInstruction{
         String opcode;
         String NIXBPE;
         String operand;
@@ -35,12 +35,34 @@ public class ObjectCode {
             this.opcode=opcode;
             this.NIXBPE=NIXBPE;
             this.operand=operand;
-        }        
+        }     
+        
+        public ObjectInstruction(String opcode, String operand)
+        {
+            this.opcode=opcode;
+            this.operand=operand;
+        }      
+        
+        public ObjectInstruction(String opcode)
+        {
+            this.opcode=opcode;
+        }              
     }
+    
     
     public void addObjectInstruction(String opcode,String NIXBPE,String operand)
     {
         objinst.add(new ObjectInstruction(opcode,NIXBPE,operand));
+    }
+    
+    public void addObjectInstruction(String opcode,String operand)
+    {
+        objinst.add(new ObjectInstruction(opcode,operand));
+    }
+    
+    public void addObjectInstruction(String opcode)
+    {
+        objinst.add(new ObjectInstruction(opcode));
     }
     
 }
