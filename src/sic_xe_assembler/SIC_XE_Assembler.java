@@ -20,6 +20,7 @@ public class SIC_XE_Assembler {
     ArrayList<Symbol> symbols = new ArrayList<Symbol>();
     private String PC;
     private String startAddress;
+    private String programname;
     private int[] memory = new int[1024];
     public final int BYTE = 8;
     public final int WORD = 24;
@@ -33,7 +34,8 @@ public class SIC_XE_Assembler {
     public boolean ASSEMBLED = false;
     Set<Character> hex = new HashSet<Character>();
     Set<String> registers = new HashSet<String>();
-
+    ObjectCode objcode = new ObjectCode();
+    
     
     public static void main(String[] args) 
     {
@@ -56,6 +58,8 @@ public class SIC_XE_Assembler {
         ass.hex.add('0');
         ass.registers.add("A");
         ass.registers.add("S");
+        ass.registers.add("B");
+        ass.registers.add("L");
         ass.registers.add("T");
         ass.registers.add("X");
         ass.registers.add("F");
@@ -90,6 +94,7 @@ public class SIC_XE_Assembler {
         AssemblyResults display = new AssemblyResults(this);
         display.run();
         display.displayResults(instructions, symbols);
+        simulate();        
     }
     
     private void stringToInstruction(String text)
@@ -153,7 +158,7 @@ public class SIC_XE_Assembler {
         }
     }
     
-     private void detectErrors()
+    private void detectErrors()
     {
         for(int i = 0; i < instructions.size(); i++)
         {
@@ -251,7 +256,7 @@ public class SIC_XE_Assembler {
         }
     }
     
-private void analyseInstructions()
+    private void analyseInstructions()
     {
         boolean addfound=false;
         int count = 0;
@@ -273,6 +278,7 @@ private void analyseInstructions()
                     instructions.get(j).address = instructions.get(i).operand1;
                 }
                 PC = instructions.get(i).operand1;
+                programname = instructions.get(i).label;
                 startAddress = PC;
             }
             else if(!instructions.get(i).comment.equals("")){
@@ -470,21 +476,34 @@ private void analyseInstructions()
             else if(instructions.get(i).opcode.equals("EQU")){
                 //address calculation here
                 
-                boolean newsymbol = true;
-                for(int j=0;j<symbols.size();j++){
-                    if(symbols.get(j).name.equals(instructions.get(i).label)){
-                        newsymbol= false;
-                    }
+                if(isExpression(instructions.get(i).operand1))
+                {
+                    instructions.get(i).address=PC;
+                    symbols.add(new Symbol(instructions.get(i).operand1,instructions.get(i).operand1,"EXP",instructions.get(i).address));                    
+                    incrementPC(3);                    
                 }
-                if(newsymbol)
-                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"EQU",instructions.get(i).address));
                 else
-                    instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
-                instructions.get(i).address=PC;
-                if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C")){
-                    int c = instructions.get(i).operand1.length();
-                    c=c-3;
-                    incrementPC(c);
+                {
+                    boolean newsymbol = true;
+                
+                    for(int j=0;j<symbols.size();j++)
+                    {
+                        if(symbols.get(j).name.equals(instructions.get(i).label))
+                        {
+                            newsymbol= false;
+                        }
+                    }
+                    if(newsymbol)
+                        symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"EQU",instructions.get(i).address));
+                    else
+                        instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
+                    instructions.get(i).address=PC;
+                    if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C"))
+                    {
+                        int c = instructions.get(i).operand1.length();
+                        c=c-3;
+                        incrementPC(c);
+                    }
                 }
             }
             else if(instructions.get(i).opcode.equals("BYTE")){                
@@ -494,6 +513,8 @@ private void analyseInstructions()
                     c=c-3;
                     incrementPC(c);
                 }
+                else
+                    incrementPC(1);
                 boolean newsymbol = true;
                 for(int j = 0; j<symbols.size();j++)
                 {
@@ -593,14 +614,74 @@ private void analyseInstructions()
         }
     }
     
+    private boolean isExpression(String test)
+    {
+        if(test.endsWith("+") ||test.endsWith("-")|| test.endsWith("*")|| test.endsWith("/"))
+        {
+            System.out.println("3");
+            return false;
+        }
+        char[] temp = test.toCharArray();
+        if(temp.length<3)
+        {
+            System.out.println("4");
+            return false;
+        }
+        if( temp[1]!='+' && temp[1]=='-' && temp[1]=='*' && temp[1]=='/')
+        {
+            System.out.println("5");
+            return false;
+        }
+        String op1 = String.valueOf(temp[0]);
+        String op2 = String.valueOf(temp[2]);
+        boolean def1 = false;
+        boolean def2 = false;
+        for(int j =0; j<symbols.size();j++)
+        {
+            if(op1.equals(symbols.get(j).name))
+                def1 = true;
+        }        
+        for(int j =0; j<symbols.size();j++)
+        {
+            if(op1.equals(symbols.get(j).name))
+                def2 = true;
+        }
+        if(registers.contains(op1))
+            def1 = true;
+        if(registers.contains(op2))
+            def2 = true;
+        return def1 && def2;
+    }
+    
     private void detectUndefinedSymbols()
     {
         for(int i=0; i<instructions.size();i++)
         {
             if(!instructions.get(i).operand1.equals("") && !instructions.get(i).opcode.equals("START"))
             {   
-                boolean defined1 = false;                
-                if(!registers.contains(instructions.get(i).operand1) && !instructions.get(i).operand1.startsWith("C'")
+                boolean defined1 = false;
+                if(!instructions.get(i).operand1.startsWith("+") && (instructions.get(i).operand1.contains("+") || instructions.get(i).operand1.contains("-") || instructions.get(i).operand1.contains("*") || instructions.get(i).operand1.contains("/")))
+                {
+                    if(isExpression(instructions.get(i).operand1))
+                    {
+                        boolean newsym=true;
+                        for(Symbol sym : symbols)
+                        {
+                            if(sym.name.equals(instructions.get(i).operand1))
+                                newsym = false;
+                        }
+                        if(newsym)
+                        {
+                            symbols.add(new Symbol(instructions.get(i).operand1,instructions.get(i).operand1,"EXP",instructions.get(i).address));
+                        }
+                    }
+                    else
+                    {
+                        System.out.println("1");
+                        instructions.get(i).Error="Unsupported Expression";
+                    }
+                }
+                else if(!registers.contains(instructions.get(i).operand1) && !instructions.get(i).operand1.startsWith("C'")
                         && !instructions.get(i).operand1.startsWith("X'") && !instructions.get(i).operand1.startsWith(Character.toString('#'))
                         && !instructions.get(i).operand1.chars().allMatch(Character::isDigit)
                         && !registers.contains(instructions.get(i).operand1)&& !instructions.get(i).operand2.startsWith("W'"))
@@ -661,13 +742,70 @@ private void analyseInstructions()
         {
             for(Instruction instruction: instructions)
             {
-                if(instruction.comment.equals(""))
+                if(instruction.comment.equals("") && !instruction.opcode.equals("START") 
+                        && !instruction.opcode.equals("END")&& !instruction.opcode.equals("RESW") 
+                        && !instruction.opcode.equals("RESB") && !instruction.opcode.equals("EQU")
+                        && !instruction.opcode.equals("ORG"))
                 {
+                    String NIXBPE = "";
                     String opcode = generateOpcode(instruction);
-                    String NIXBPE = generateNIXBPE(instruction);
+                    if(!Instruction.format2.contains(instruction.opcode))
+                        NIXBPE = generateNIXBPE(instruction);
                     String operand = generateOperand(instruction);
+                    System.out.println(instruction.opcode + "_" + opcode + "_"  + NIXBPE+ "_"  + operand);
+                    if(Instruction.format2.contains(instruction.opcode))
+                    {
+                        String result = opcode+operand;
+                        long foo = Long.parseLong(result,2);
+                        result = Long.toHexString(foo);
+                        System.out.println(result);
+                        result = "000000".substring(result.length()) + result;
+                        objcode.addObjectInstruction(result,instruction.address.toUpperCase(),2);
+                    }
+                    else if(Instruction.format3.contains(instruction.opcode))
+                    {
+                        String result = opcode+NIXBPE+operand;
+                        long foo = Long.parseLong(result,2);
+                        result = Long.toHexString(foo);
+                        System.out.println(result);
+                        result = "000000".substring(result.length()) + result;                        
+                        objcode.addObjectInstruction(result,instruction.address.toUpperCase(),3);
+                    }
+                    else if( Instruction.format4.contains(instruction.opcode))
+                    {
+                        String result = opcode+NIXBPE+operand;
+                        long foo = Long.parseLong(result,2);
+                        result = Long.toHexString(foo);
+                        System.out.println(result);
+                        result = "000000".substring(result.length()) + result;                        
+                        objcode.addObjectInstruction(result,instruction.address.toUpperCase(),4);
+                    }
+                    else if(instruction.opcode.equals("BYTE"))
+                    {
+                        String result = instruction.operand1;
+                        if(instruction.operand1.startsWith("X") || instruction.operand1.startsWith("C"))                        
+                            result = Integer.toHexString(instruction.operand1.length()-3);
+                        else if( isNumeric(result))                          
+                            result = Integer.toHexString(Integer.parseInt(instruction.operand1));
+                        result = "000000".substring(result.length()) + result;                        
+                        objcode.addObjectInstruction(result,instruction.address,5);
+                    }
+                    else if(instruction.opcode.equals("WORD"))
+                    {                        
+                        String result = instruction.operand1;
+                        if(isNumeric(result))
+                        {
+                            result = Integer.toHexString(Integer.parseInt(instruction.operand1));
+                        }
+                        else if(instruction.operand1.startsWith("X") || instruction.operand1.startsWith("C"))
+                            result = Integer.toHexString(instruction.operand1.length()-3);
+                        result = "000000".substring(result.length()) + result;                        
+                        objcode.addObjectInstruction(result,instruction.address,5);
+                    }                   
                 }
             }
+            ObjectCodeDisplay display = new ObjectCodeDisplay();
+            display.displayResults(objcode.objinst,programname,startAddress,PC);
         }
         else
         {
@@ -681,6 +819,7 @@ private void analyseInstructions()
     private String generateOpcode(Instruction inst)
     {
         String temp;
+        int type;
         if(inst.opcode.startsWith("+"))
             temp = inst.opcode.substring(1);
         else
@@ -689,7 +828,13 @@ private void analyseInstructions()
         {
             if(temp.equals(ObjectCode.opcodes[i][0]))
             {
-                return ObjectCode.opcodes[i][0];
+                int foo = Integer.parseInt(ObjectCode.opcodes[i][1],16);
+                String result = Integer.toBinaryString(foo);
+                result = "00000000".substring(result.length()) + result;
+                if(Instruction.format3.contains(inst.opcode) || Instruction.format4.contains(inst.opcode))
+                    return result.substring(2);
+                else
+                    return result;
             }
         }
         return "00";
@@ -734,15 +879,15 @@ private void analyseInstructions()
         if(LABEL)
         {
             address = findAddress(test);
-            nextAddress = findNextAddress(inst.address);                
+            nextAddress = findNextAddress(inst.address);   
             int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
             if(result >= -2048 && result <=2047)
             {
-                NIXBPE = NIXBPE + "10";
+                NIXBPE = NIXBPE + "01";
             }
             else if(result<=4095)
             {
-                NIXBPE = NIXBPE + "01";
+                NIXBPE = NIXBPE + "10";
             }
             else
                 System.out.println("DISPLACEMENT OUT OF BOUNDS");               
@@ -765,6 +910,29 @@ private void analyseInstructions()
     private String generateOperand(Instruction inst)
     {
         //Format 2
+        if(inst.opcode.equals("TIXR"))
+        {
+            String r1="";
+        
+            switch(inst.operand1){
+                case "A":
+                    r1="0";
+                    break;
+                case "B":
+                    r1="3";
+                    break;
+                case "S":
+                    r1="4";
+                    break;
+                case "T":
+                    r1="5";
+                    break;
+                case "L":
+                    r1="2";
+                    break;
+                }   
+            return r1 + "1";
+        }        
         if(Instruction.format2.contains(inst.opcode)&& !inst.opcode.equals("TIXR"))
         {
             String r1="",r2="";
@@ -808,52 +976,69 @@ private void analyseInstructions()
                     r2="1";
                     break;                       
                 }
-            return r1+r2;
+            int foo = Integer.parseInt(r1+r2,16);
+            String result = Integer.toBinaryString(foo);
+            result = "00000000".substring(result.length()) + result;            
+            return result;
         }
         //Format 4
         else if(inst.opcode.startsWith("+")){
-            if(inst.operand1.startsWith("@"))
+            String test = inst.operand1.substring(1);
+            if(isNumeric(test))
             {
-                
+                int foo = Integer.parseInt(test,16);
+                String result = Integer.toBinaryString(foo);
+                if(result.length() > 20)
+                    result = result.substring(result.length()-20);                
+                result = "00000000000000000000".substring(result.length()) + result;                
+                return result;
             }
-            else if(inst.operand1.startsWith("#"))
-            {          
-                
-            }
-            else{
-                
+            else
+            {
+                int foo = Integer.parseInt(findAddress(test),16);                
+                String result = Integer.toBinaryString(foo);
+                if(result.length() > 20)
+                    result = result.substring(result.length()-20);
+                result = "00000000000000000000".substring(result.length()) + result;                
+                return result;
             }
         }
         //format 3
-        else{            
-            String test = inst.operand1;
-            if(test.startsWith("#") || test.startsWith("@"))
-            {   
-                test = inst.operand1.substring(1);
-            }
-            
-            boolean LABEL = false;
-            char[] testarr = test.toCharArray();
-            for(int j = 0; j<testarr.length;j++)
-            {   
-                if(!Character.isDigit(testarr[j]))
+        else{
+                String test = inst.operand1;
+                if(inst.operand1.startsWith("#") || inst.operand1.startsWith("@"))
+                     test = inst.operand1.substring(1);
+                if(isNumeric(test))
                 {
-                    LABEL = true; 
+                    int foo = Integer.parseInt(test,16);
+                    String result = Integer.toBinaryString(foo);                    
+                    if(result.length() > 12)
+                        result = result.substring(result.length()-12);
+                    result = "000000000000".substring(result.length()) + result;                
+                    return result;
                 }
-            }
-            String address;
-            String nextAddress;
-            if(LABEL)
+                else
+                {
+                    int foo = Integer.parseInt(findAddress(test),16);
+                    String result = Integer.toBinaryString(foo);
+                    if(result.length() > 12)
+                        result = result.substring(result.length()-12);                    
+                    result = "000000000000".substring(result.length()) + result;                
+                    return result;
+                }
+            }        
+    }
+    
+    private boolean isLabel(String label)
+    {
+        for(Symbol sym:symbols)
+        {
+            if(sym.name.equals(label))
             {
-                address = findAddress(test);
-                nextAddress = findNextAddress(inst.address);                
-                int result = Integer.parseInt(nextAddress,16) - Integer.parseInt(address,16);
-                return Integer.toHexString(result);
+                return true;
             }
-                int result = Integer.parseInt(test);
-                return Integer.toHexString(result);
-            }
-        return null;
+        }
+        return false;
     }
     
     private String findAddress(String name)
@@ -874,7 +1059,10 @@ private void analyseInstructions()
         {
             if(instructions.get(i).address.equals(address))
             {
-                return instructions.get(i+1).address;
+                int j=i+1;
+                while(!instructions.get(j).comment.equals(""))
+                    j++;
+                return instructions.get(j).address;
             }
         }
         return null;

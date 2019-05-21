@@ -24,23 +24,66 @@ public class ObjectCode {
                           {"SUBR","94"} , {"TIX", "2C"} , {"TIXR","B8"}
                           };    
     
-    class ObjectInstruction{
+    public class ObjectInstruction{
+        String address;
         String opcode;
         String NIXBPE;
         String operand;
         String result;
+        int format;
         
-        public ObjectInstruction(String opcode, String NIXBPE, String operand)
+        public ObjectInstruction(String opcode, String NIXBPE, String operand, String address)
         {
-            this.opcode=opcode;
-            this.NIXBPE=NIXBPE;
-            this.operand=operand;
-        }        
+            //format3,4
+            this.address = address;
+            this.opcode = opcode;
+            this.NIXBPE = NIXBPE;
+            this.operand = operand;
+        }     
+        
+        public ObjectInstruction(String opcode, String operand, String address)
+        {
+            //format2
+            this.address = address;
+            this.opcode = opcode;
+            this.operand = operand;
+        }      
+        
+        public ObjectInstruction(String operand, String address)
+        {
+            //directives
+            this.address = address;
+            this.operand = operand;
+        }          
+        
+        public ObjectInstruction(String result, String address, int format)
+        {
+            
+            this.result = result;
+            this.address = address;
+            this.format = format;
+        }         
     }
     
-    public void addObjectInstruction(String opcode,String NIXBPE,String operand)
+    
+    public void addObjectInstruction(String opcode,String NIXBPE,String operand, String address)
     {
-        objinst.add(new ObjectInstruction(opcode,NIXBPE,operand));
+        objinst.add(new ObjectInstruction(opcode,NIXBPE,operand,address));
+    }
+    
+    public void addObjectInstruction(String result, String address, int format)
+    {
+        objinst.add(new ObjectInstruction(result,address,format));
+    }
+    
+    public void addObjectInstruction(String opcode,String operand,String address)
+    {
+        objinst.add(new ObjectInstruction(opcode,operand,address));
+    }
+    
+    public void addObjectInstruction(String opcode, String address)
+    {
+        objinst.add(new ObjectInstruction(opcode,address));
     }
     
 }
