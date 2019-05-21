@@ -54,7 +54,7 @@ public class ObjectCodeDisplay extends javax.swing.JFrame {
         }
         int declarations =i;
 
-        int proglength = declarations;
+        int proglength = declarations*3;
         String record = "T^"+objinst.get(0).address+"^"+Integer.toHexString(0x100|proglength).substring(1);        
         int count=0;
         for(int k=0;k<declarations;k++)
@@ -65,7 +65,7 @@ public class ObjectCodeDisplay extends javax.swing.JFrame {
         
         if(i<objinst.size())
         {
-            int record_length = objinst.size()-i;
+            int record_length = (objinst.size()-i)*3;
             record = "T^"+objinst.get(i).address;            
             record = record + "^" + Integer.toHexString(0x100 | record_length).substring(1);
             for(int j = i; j<objinst.size();j++)
