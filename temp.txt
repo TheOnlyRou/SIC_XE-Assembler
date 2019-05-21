@@ -1,0 +1,28 @@
+.  if y>=6 then e = 5y else e = y+10
+.
+prog start 1000
+bgn LDA Y
+COMP #6
+COMP #6
+JGT ELSE
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+STA E
+J OUT
+ELSE LDA Y+E
+ADDR A , S
+STA E   
+OUT j OUT
+.
+Y WORD 4  
+E RESW 1 
+END BGN

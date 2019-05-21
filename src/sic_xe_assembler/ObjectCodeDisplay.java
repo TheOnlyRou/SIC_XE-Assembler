@@ -94,6 +94,7 @@ public class ObjectCodeDisplay extends javax.swing.JFrame {
             jTextArea2.append(record.toUpperCase());
         }
         jTextArea2.append(Erecord.toUpperCase()+"\n");
+        jTextArea2.append("\n\n\n\n PRESS ANY KEY TO CONTINUE");
         this.run();
     }
     
