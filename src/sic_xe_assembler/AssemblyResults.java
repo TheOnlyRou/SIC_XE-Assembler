@@ -63,7 +63,7 @@ public class AssemblyResults extends javax.swing.JFrame {
         {           
             String test = "" + i;
             if(!instructions.get(i).address.isEmpty())
-                test = test + "\t" + instructions.get(i).address.toUpperCase();
+                test = test + "\t" + instructions.get(i).address;
             else
                 test = test+ "\t";            
             if(!instructions.get(i).comment.isEmpty())
@@ -86,8 +86,7 @@ public class AssemblyResults extends javax.swing.JFrame {
         jTable1.setFocusable(false);
         for(int i = 0; i<symbols.size();i++)
         {
-            if(!symbols.get(i).type.equals("EXP"))
-                model.addRow(new Object[]{ symbols.get(i).name , symbols.get(i).address.toUpperCase()});
+                model.addRow(new Object[]{ symbols.get(i).name , symbols.get(i).address});
         }
         jTextArea1.append("\n\nPRESS ENTER KEY TO CONTINUE...");
         update(this.getGraphics());

@@ -5,7 +5,7 @@ public class Symbol {
 
     String data;
     String name;
-    String type="";
+    String type;
     String address;
     int size;
     
