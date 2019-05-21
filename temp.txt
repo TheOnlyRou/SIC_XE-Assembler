@@ -3,11 +3,22 @@
 prog start 1000
 bgn LDA Y
 COMP #6
+COMP #6
 JGT ELSE
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
+LDA #5
 LDA #5
 STA E
 J OUT
-ELSE LDA Y
+ELSE LDA Y+E
 ADDR A , S
 STA E   
 OUT j OUT

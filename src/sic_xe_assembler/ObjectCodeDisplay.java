@@ -43,7 +43,6 @@ public class ObjectCodeDisplay extends javax.swing.JFrame {
         int start = Integer.parseInt(startAddress,16);
         int end = Integer.parseInt(lastAddress, 16);
         startAddress = Integer.toHexString(0x1000000 | start).substring(1);
-        lastAddress = Integer.toHexString(0x1000000 | end).substring(1);
         String Hrecord = "H^"+programname+"^"+startAddress+"^"+length;
         String Erecord = "E^"+startAddress;
         jTextArea2.append(Hrecord.toUpperCase()+"\n");
@@ -52,25 +51,43 @@ public class ObjectCodeDisplay extends javax.swing.JFrame {
         {
             i++;
         }
-        int declarations =i;
-
-        int proglength = declarations*3;
-        String record = "T^"+objinst.get(0).address+"^"+Integer.toHexString(0x100|proglength).substring(1);        
-        int count=0;
-        for(int k=0;k<declarations;k++)
-        {            
-            record = record + "^" + objinst.get(k).result;
+        int declarations = i;
+        int proglength = declarations;
+        int instlength = proglength; 
+        double y = Math.ceil((float)instlength/10);
+        System.out.println((float)instlength/10);
+        System.out.println(y);
+        int z=0;
+        while(z < y)
+        {	
+            int textlength;
+            if(instlength>=10)
+            	textlength=10*3;		
+            else
+            	textlength = instlength*3;
+            System.out.println(textlength);            
+            String foo = Integer.toHexString(textlength);
+            foo = "00".substring(foo.length())+foo;
+            String record = "T^"+objinst.get(0+z*10).address + "^" + foo;
+            textlength = textlength/3;
+            int j=0;
+            for(j=j+z*10;j<textlength+10*z;j++)
+            {
+                record = record +"^"+ objinst.get(j).result;
+            }	
+            jTextArea2.append(record.toUpperCase()+"\n");
+            instlength -= textlength;
+            z++;
         }
-        jTextArea2.append(record.toUpperCase()+"\n");        
         
         if(i<objinst.size())
         {
+            String record = "";
             int record_length = (objinst.size()-i)*3;
             record = "T^"+objinst.get(i).address;            
             record = record + "^" + Integer.toHexString(0x100 | record_length).substring(1);
             for(int j = i; j<objinst.size();j++)
             {
-                record = record+"^";
                 record = record + "^" + objinst.get(j).result;
             }
             record = record + "\n";

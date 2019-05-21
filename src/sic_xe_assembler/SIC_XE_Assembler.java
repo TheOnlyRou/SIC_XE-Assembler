@@ -58,6 +58,8 @@ public class SIC_XE_Assembler {
         ass.hex.add('0');
         ass.registers.add("A");
         ass.registers.add("S");
+        ass.registers.add("B");
+        ass.registers.add("L");
         ass.registers.add("T");
         ass.registers.add("X");
         ass.registers.add("F");
@@ -92,8 +94,7 @@ public class SIC_XE_Assembler {
         AssemblyResults display = new AssemblyResults(this);
         display.run();
         display.displayResults(instructions, symbols);
-        simulate();
-        
+        simulate();        
     }
     
     private void stringToInstruction(String text)
@@ -157,7 +158,7 @@ public class SIC_XE_Assembler {
         }
     }
     
-     private void detectErrors()
+    private void detectErrors()
     {
         for(int i = 0; i < instructions.size(); i++)
         {
@@ -475,21 +476,34 @@ public class SIC_XE_Assembler {
             else if(instructions.get(i).opcode.equals("EQU")){
                 //address calculation here
                 
-                boolean newsymbol = true;
-                for(int j=0;j<symbols.size();j++){
-                    if(symbols.get(j).name.equals(instructions.get(i).label)){
-                        newsymbol= false;
-                    }
+                if(isExpression(instructions.get(i).operand1))
+                {
+                    instructions.get(i).address=PC;
+                    symbols.add(new Symbol(instructions.get(i).operand1,instructions.get(i).operand1,"EXP",instructions.get(i).address));                    
+                    incrementPC(3);                    
                 }
-                if(newsymbol)
-                    symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"EQU",instructions.get(i).address));
                 else
-                    instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
-                instructions.get(i).address=PC;
-                if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C")){
-                    int c = instructions.get(i).operand1.length();
-                    c=c-3;
-                    incrementPC(c);
+                {
+                    boolean newsymbol = true;
+                
+                    for(int j=0;j<symbols.size();j++)
+                    {
+                        if(symbols.get(j).name.equals(instructions.get(i).label))
+                        {
+                            newsymbol= false;
+                        }
+                    }
+                    if(newsymbol)
+                        symbols.add(new Symbol(instructions.get(i).label,instructions.get(i).operand1,"EQU",instructions.get(i).address));
+                    else
+                        instructions.get(i).Error = "ERROR: LABEL " + instructions.get(i).label + " WAS ALREADY DEFINED";
+                    instructions.get(i).address=PC;
+                    if(instructions.get(i).operand1.startsWith("X") || instructions.get(i).operand1.startsWith("C"))
+                    {
+                        int c = instructions.get(i).operand1.length();
+                        c=c-3;
+                        incrementPC(c);
+                    }
                 }
             }
             else if(instructions.get(i).opcode.equals("BYTE")){                
@@ -600,14 +614,74 @@ public class SIC_XE_Assembler {
         }
     }
     
+    private boolean isExpression(String test)
+    {
+        if(test.endsWith("+") ||test.endsWith("-")|| test.endsWith("*")|| test.endsWith("/"))
+        {
+            System.out.println("3");
+            return false;
+        }
+        char[] temp = test.toCharArray();
+        if(temp.length<3)
+        {
+            System.out.println("4");
+            return false;
+        }
+        if( temp[1]!='+' && temp[1]=='-' && temp[1]=='*' && temp[1]=='/')
+        {
+            System.out.println("5");
+            return false;
+        }
+        String op1 = String.valueOf(temp[0]);
+        String op2 = String.valueOf(temp[2]);
+        boolean def1 = false;
+        boolean def2 = false;
+        for(int j =0; j<symbols.size();j++)
+        {
+            if(op1.equals(symbols.get(j).name))
+                def1 = true;
+        }        
+        for(int j =0; j<symbols.size();j++)
+        {
+            if(op1.equals(symbols.get(j).name))
+                def2 = true;
+        }
+        if(registers.contains(op1))
+            def1 = true;
+        if(registers.contains(op2))
+            def2 = true;
+        return def1 && def2;
+    }
+    
     private void detectUndefinedSymbols()
     {
         for(int i=0; i<instructions.size();i++)
         {
             if(!instructions.get(i).operand1.equals("") && !instructions.get(i).opcode.equals("START"))
             {   
-                boolean defined1 = false;                
-                if(!registers.contains(instructions.get(i).operand1) && !instructions.get(i).operand1.startsWith("C'")
+                boolean defined1 = false;
+                if(!instructions.get(i).operand1.startsWith("+") && (instructions.get(i).operand1.contains("+") || instructions.get(i).operand1.contains("-") || instructions.get(i).operand1.contains("*") || instructions.get(i).operand1.contains("/")))
+                {
+                    if(isExpression(instructions.get(i).operand1))
+                    {
+                        boolean newsym=true;
+                        for(Symbol sym : symbols)
+                        {
+                            if(sym.name.equals(instructions.get(i).operand1))
+                                newsym = false;
+                        }
+                        if(newsym)
+                        {
+                            symbols.add(new Symbol(instructions.get(i).operand1,instructions.get(i).operand1,"EXP",instructions.get(i).address));
+                        }
+                    }
+                    else
+                    {
+                        System.out.println("1");
+                        instructions.get(i).Error="Unsupported Expression";
+                    }
+                }
+                else if(!registers.contains(instructions.get(i).operand1) && !instructions.get(i).operand1.startsWith("C'")
                         && !instructions.get(i).operand1.startsWith("X'") && !instructions.get(i).operand1.startsWith(Character.toString('#'))
                         && !instructions.get(i).operand1.chars().allMatch(Character::isDigit)
                         && !registers.contains(instructions.get(i).operand1)&& !instructions.get(i).operand2.startsWith("W'"))
@@ -952,7 +1026,19 @@ public class SIC_XE_Assembler {
                     result = "000000000000".substring(result.length()) + result;                
                     return result;
                 }
+            }        
+    }
+    
+    private boolean isLabel(String label)
+    {
+        for(Symbol sym:symbols)
+        {
+            if(sym.name.equals(label))
+            {
+                return true;
             }
+        }
+        return false;
     }
     
     private String findAddress(String name)

@@ -86,7 +86,8 @@ public class AssemblyResults extends javax.swing.JFrame {
         jTable1.setFocusable(false);
         for(int i = 0; i<symbols.size();i++)
         {
-            model.addRow(new Object[]{ symbols.get(i).name , symbols.get(i).address.toUpperCase()});
+            if(!symbols.get(i).type.equals("EXP"))
+                model.addRow(new Object[]{ symbols.get(i).name , symbols.get(i).address.toUpperCase()});
         }
         jTextArea1.append("\n\nPRESS ENTER KEY TO CONTINUE...");
         update(this.getGraphics());
