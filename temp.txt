@@ -5,11 +5,10 @@ bgn LDA Y
 COMP #6
 JGT ELSE
 LDA #5
-MUL Y
 STA E
 J OUT
 ELSE LDA Y
-ADDR #10 , S
+ADDR A , S
 STA E   
 OUT j OUT
 .

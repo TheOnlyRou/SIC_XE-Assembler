@@ -63,7 +63,7 @@ public class AssemblyResults extends javax.swing.JFrame {
         {           
             String test = "" + i;
             if(!instructions.get(i).address.isEmpty())
-                test = test + "\t" + instructions.get(i).address;
+                test = test + "\t" + instructions.get(i).address.toUpperCase();
             else
                 test = test+ "\t";            
             if(!instructions.get(i).comment.isEmpty())
@@ -86,7 +86,7 @@ public class AssemblyResults extends javax.swing.JFrame {
         jTable1.setFocusable(false);
         for(int i = 0; i<symbols.size();i++)
         {
-                model.addRow(new Object[]{ symbols.get(i).name , symbols.get(i).address});
+            model.addRow(new Object[]{ symbols.get(i).name , symbols.get(i).address.toUpperCase()});
         }
         jTextArea1.append("\n\nPRESS ENTER KEY TO CONTINUE...");
         update(this.getGraphics());
@@ -178,7 +178,6 @@ public class AssemblyResults extends javax.swing.JFrame {
 
     private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
         this.setVisible(false);
-        this.dispose();
     }//GEN-LAST:event_formKeyPressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
